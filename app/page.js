@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import Leaderboard from "@/components/Leaderboard";
 import SearchBox from "@/components/SearchBox";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
@@ -31,10 +30,10 @@ export default async function HomePage() {
     }));
 
     return (
-        <main>
-            <Header />
-
+        <main className="page">
             <section className="hero">
+                <div className="brand">WOMEN NAME</div>
+
                 <h1>
                     КАКОЕ ЖЕНСКОЕ ИМЯ
                     <br />
@@ -48,45 +47,31 @@ export default async function HomePage() {
                 <p className="rule">
                     1 ЧЕЛОВЕК = 1 ГОЛОС В ДЕНЬ
                 </p>
-
-                <SearchBox names={searchNames} />
             </section>
 
-            <div id="rating" className="content-shell">
-                <Leaderboard names={names} limit={10} />
-            </div>
-
-            <section id="about" className="about-section">
-                <div className="terminal-title">
-                    / КАК ЭТО РАБОТАЕТ /
+            <section className="main-layout">
+                <div className="rating-column">
+                    <Leaderboard names={names} limit={10} />
                 </div>
 
-                <div className="about-grid">
-                    <div>
-                        <b>01</b>
-                        <span>Найди своё имя</span>
+                <aside className="search-column">
+                    <div className="side-label">
+                        НАЙДИ СВОЁ ИМЯ
                     </div>
 
-                    <div>
-                        <b>02</b>
-                        <span>Отдай один голос</span>
-                    </div>
+                    <SearchBox names={searchNames} />
 
-                    <div>
-                        <b>03</b>
-                        <span>Возвращайся завтра</span>
+                    <div className="side-note">
+                        НЕ НАШЁЛ?
+                        <br />
+                        ПРЕДЛОЖИ НОВОЕ ИМЯ
                     </div>
-                </div>
-
-                <p>
-                    Если имени нет, предложи его через поиск.
-                    После проверки оно появится в рейтинге.
-                </p>
+                </aside>
             </section>
 
             <footer>
-                <span>ИМЕНА ДЕЛАЮТ МИР ЯРЧЕ ♥</span>
-                <span>© 2026 ИМЯ.</span>
+                <span>WOMEN NAME</span>
+                <span>© 2026</span>
             </footer>
         </main>
     );
