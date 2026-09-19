@@ -1,48 +1,129 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function VoteButton({ nameId, name, compact = false }) {
-  const [state, setState] = useState("idle");
-  const [message, setMessage] = useState("");
+export default function VoteButton({
+                                     nameId,
+                                     name,
+                                     compact = false,
+                                   }) {
   const router = useRouter();
 
-  async function vote() {
-    if (state === "loading" || state === "done") return;
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
-    setState("loading");
-    setMessage("");
+  const toastTimer = useRef(null);
+
+  function showToast(message, type = "success") {
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+    }
+
+    setToast({
+      message,
+      type,
+    });
+
+    toastTimer.current = setTimeout(() => {
+      setToast(null);
+    }, 2500);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) {
+        clearTimeout(toastTimer.current);
+      }
+    };
+  }, []);
+
+  async function vote() {
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/vote", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nameId }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nameId,
+        }),
       });
+
       const data = await response.json();
 
       if (!response.ok) {
-        setState(data.alreadyVoted ? "blocked" : "error");
-        setMessage(data.error || "Ошибка");
+        if (data.alreadyVoted) {
+          showToast(
+              "ТЫ УЖЕ ГОЛОСОВАЛ СЕГОДНЯ",
+              "blocked"
+          );
+        } else {
+          showToast(
+              data.error || "НЕ УДАЛОСЬ ОТПРАВИТЬ ГОЛОС",
+              "error"
+          );
+        }
+
         return;
       }
 
-      setState("done");
-      setMessage(`> VOTE ACCEPTED · ${name.toUpperCase()} +1`);
+      showToast(
+          `ГОЛОС ПРИНЯТ · ${name.toUpperCase()} +1`,
+          "success"
+      );
+
       router.refresh();
     } catch {
-      setState("error");
-      setMessage("Не удалось отправить голос.");
+      showToast(
+          "НЕ УДАЛОСЬ ОТПРАВИТЬ ГОЛОС",
+          "error"
+      );
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
-    <div className={compact ? "vote-wrap compact" : "vote-wrap"}>
-      <button className="terminal-button" onClick={vote} disabled={state === "loading" || state === "done"}>
-        {state === "loading" ? "..." : state === "done" ? "ГОЛОС ПРИНЯТ" : compact ? "+1" : "ГОЛОСОВАТЬ"}
-      </button>
-      {message ? <div className={`terminal-message ${state}`}>{message}</div> : null}
-    </div>
+      <>
+        <div
+            className={
+              compact
+                  ? "vote-wrap compact"
+                  : "vote-wrap"
+            }
+        >
+          <button
+              className="terminal-button"
+              onClick={vote}
+              aria-busy={isLoading}
+              aria-label={`Голосовать за ${name}`}
+          >
+            {compact ? "+1" : "ГОЛОСОВАТЬ"}
+          </button>
+        </div>
+
+        {toast && (
+            <div
+                className={`vote-toast ${toast.type}`}
+                role="status"
+                aria-live="polite"
+            >
+          <span className="vote-toast-prompt">
+            &gt;
+          </span>
+
+              <span>
+            {toast.message}
+          </span>
+            </div>
+        )}
+      </>
   );
 }
