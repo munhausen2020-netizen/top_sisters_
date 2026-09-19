@@ -6,56 +6,88 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 export const dynamic = "force-dynamic";
 
 async function getNames() {
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("name_ranking")
-    .select("id,name,slug,score,today_score")
-    .order("score", { ascending: false })
-    .order("name", { ascending: true });
+    const supabase = getSupabaseAdmin();
 
-  if (error) throw error;
-  return data || [];
+    const { data, error } = await supabase
+        .from("name_ranking")
+        .select("id,name,slug,score,today_score")
+        .order("score", { ascending: false })
+        .order("name", { ascending: true });
+
+    if (error) {
+        throw error;
+    }
+
+    return data || [];
 }
 
 export default async function HomePage() {
-  const names = await getNames();
+    const names = await getNames();
 
-  return (
-    <main>
-      <Header />
+    const searchNames = names.map(({ id, name, slug }) => ({
+        id,
+        name,
+        slug,
+    }));
 
-      <section className="hero">
-        <div className="pixel-girl" aria-hidden="true">
-          <div className="crown">♛</div>
-          <div className="face">◉‿◉</div>
-        </div>
+    return (
+        <main>
+            <Header />
 
-        <div className="eyebrow">БОЛЬШЕ, ЧЕМ ПРОСТО ИМЯ</div>
-        <h1>КАКОЕ ЖЕНСКОЕ ИМЯ №1 В РОССИИ?</h1>
-        <p>Голосуй за своё имя и поднимай его в рейтинге.</p>
-        <p className="rule">1 ЧЕЛОВЕК = 1 ГОЛОС В ДЕНЬ</p>
+            <section className="hero">
+                <h1>
+                    КАКОЕ ЖЕНСКОЕ ИМЯ
+                    <br />
+                    №1 В РОССИИ?
+                </h1>
 
-        <SearchBox names={names.map(({ id, name, slug }) => ({ id, name, slug }))} />
-      </section>
+                <p className="hero-description">
+                    Голосуй за своё имя и поднимай его в рейтинге.
+                </p>
 
-      <div id="rating" className="content-shell">
-        <Leaderboard names={names} limit={10} />
-      </div>
+                <p className="rule">
+                    1 ЧЕЛОВЕК = 1 ГОЛОС В ДЕНЬ
+                </p>
 
-      <section id="about" className="about-section">
-        <div className="terminal-title">/ КАК ЭТО РАБОТАЕТ /</div>
-        <div className="about-grid">
-          <div><b>01</b><span>Найди своё имя</span></div>
-          <div><b>02</b><span>Отдай один голос</span></div>
-          <div><b>03</b><span>Возвращайся завтра</span></div>
-        </div>
-        <p>Если имени нет, предложи его через поиск. После проверки оно появится в рейтинге.</p>
-      </section>
+                <SearchBox names={searchNames} />
+            </section>
 
-      <footer>
-        <span>ИМЕНА ДЕЛАЮТ МИР ЯРЧЕ ♥</span>
-        <span>© 2026 ИМЯ.</span>
-      </footer>
-    </main>
-  );
+            <div id="rating" className="content-shell">
+                <Leaderboard names={names} limit={10} />
+            </div>
+
+            <section id="about" className="about-section">
+                <div className="terminal-title">
+                    / КАК ЭТО РАБОТАЕТ /
+                </div>
+
+                <div className="about-grid">
+                    <div>
+                        <b>01</b>
+                        <span>Найди своё имя</span>
+                    </div>
+
+                    <div>
+                        <b>02</b>
+                        <span>Отдай один голос</span>
+                    </div>
+
+                    <div>
+                        <b>03</b>
+                        <span>Возвращайся завтра</span>
+                    </div>
+                </div>
+
+                <p>
+                    Если имени нет, предложи его через поиск.
+                    После проверки оно появится в рейтинге.
+                </p>
+            </section>
+
+            <footer>
+                <span>ИМЕНА ДЕЛАЮТ МИР ЯРЧЕ ♥</span>
+                <span>© 2026 ИМЯ.</span>
+            </footer>
+        </main>
+    );
 }
