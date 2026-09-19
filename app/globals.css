@@ -11,14 +11,39 @@
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(23,255,102,.05), transparent 26%),
-    linear-gradient(rgba(32,255,105,.018) 1px, transparent 1px);
-  background-size: auto, 100% 4px;
+
+  background-color: var(--bg);
+
+  background-image:
+          radial-gradient(
+                  circle at 50% 18%,
+                  rgba(23, 255, 102, 0.05),
+                  transparent 26%
+          ),
+          linear-gradient(
+                  rgba(32, 255, 105, 0.018) 1px,
+                  transparent 1px
+          );
+
+  background-size:
+          auto,
+          100% 4px;
+
   color: var(--green);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  font-family:
+          ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Monaco,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+
   min-height: 100vh;
-  text-shadow: 0 0 8px rgba(32,255,105,.16);
+
+  text-shadow:
+          0 0 8px rgba(32, 255, 105, 0.16);
 }
 
 body::after {
