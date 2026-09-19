@@ -32,8 +32,6 @@ export default async function HomePage() {
     return (
         <main className="page">
             <section className="hero">
-                <div className="brand">WOMEN NAME</div>
-
                 <h1>
                     КАКОЕ ЖЕНСКОЕ ИМЯ
                     <br />
@@ -56,21 +54,14 @@ export default async function HomePage() {
 
                 <aside className="search-column">
                     <div className="side-label">
-                        НАЙДИ СВОЁ ИМЯ
+                        НАЙТИ СВОЁ ИМЯ
                     </div>
 
                     <SearchBox names={searchNames} />
-
-                    <div className="side-note">
-                        НЕ НАШЁЛ?
-                        <br />
-                        ПРЕДЛОЖИ НОВОЕ ИМЯ
-                    </div>
                 </aside>
             </section>
 
             <footer>
-                <span>WOMEN NAME</span>
                 <span>© 2026</span>
             </footer>
         </main>
