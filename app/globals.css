@@ -6,6 +6,10 @@
     --danger: #ff4f6d;
 }
 
+/* =========================================================
+   RESET
+========================================================= */
+
 * {
     box-sizing: border-box;
 }
@@ -42,12 +46,15 @@ body {
     min-height: 100vh;
 
     text-shadow:
-            0 0 6px rgba(25, 255, 99, 0.11);
+            0 0 6px
+            rgba(25, 255, 99, 0.11);
 }
 
 body::after {
     content: "";
+
     position: fixed;
+
     inset: 0;
 
     pointer-events: none;
@@ -68,6 +75,7 @@ body::after {
 
 a {
     color: inherit;
+
     text-decoration: none;
 }
 
@@ -89,7 +97,11 @@ button {
 ========================================================= */
 
 .hero {
-    width: min(1180px, calc(100% - 40px));
+    width:
+            min(
+                    1180px,
+                    calc(100% - 40px)
+            );
 
     margin: 0 auto;
 
@@ -153,7 +165,11 @@ button {
 ========================================================= */
 
 .main-layout {
-    width: min(1180px, calc(100% - 40px));
+    width:
+            min(
+                    1180px,
+                    calc(100% - 40px)
+            );
 
     margin:
             0
@@ -175,10 +191,18 @@ button {
     min-width: 0;
 }
 
+/* =========================================================
+   STICKY SEARCH
+========================================================= */
+
 .search-column {
     position: sticky;
 
     top: 28px;
+
+    align-self: start;
+
+    padding-top: 4px;
 }
 
 .side-label {
@@ -189,6 +213,27 @@ button {
     letter-spacing: 3px;
 
     opacity: 0.72;
+}
+
+.search-hint {
+    margin-top: 22px;
+
+    padding-top: 18px;
+
+    border-top:
+            1px
+            solid
+            rgba(25, 255, 99, 0.15);
+
+    color: var(--green);
+
+    font-size: 9px;
+
+    line-height: 1.8;
+
+    letter-spacing: 1.8px;
+
+    opacity: 0.38;
 }
 
 /* =========================================================
@@ -211,15 +256,41 @@ button {
 }
 
 .leaderboard-head {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 5;
+
     display: flex;
 
     justify-content: space-between;
 
     align-items: center;
 
-    margin-bottom: 20px;
+    min-height: 48px;
 
-    font-size: 12px;
+    margin:
+            -24px
+            -28px
+            8px;
+
+    padding:
+            0
+            28px;
+
+    border-bottom:
+            1px
+            solid
+            rgba(25, 255, 99, 0.22);
+
+    background:
+            rgba(0, 0, 0, 0.96);
+
+    backdrop-filter:
+            blur(8px);
+
+    font-size: 11px;
 
     letter-spacing: 2px;
 }
@@ -229,6 +300,8 @@ button {
 }
 
 .leader-row {
+    position: relative;
+
     display: grid;
 
     grid-template-columns:
@@ -242,12 +315,24 @@ button {
 
     align-items: center;
 
-    min-height: 62px;
+    min-height: 64px;
+
+    padding:
+            4px
+            0;
 
     border-top:
             1px
             dashed
             rgba(25, 255, 99, 0.13);
+
+    scroll-margin-top: 92px;
+
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            color 0.2s ease;
 }
 
 .leader-row:first-child {
@@ -258,18 +343,15 @@ button {
     opacity: 0.7;
 
     font-size: 16px;
+
+    font-variant-numeric:
+            tabular-nums;
 }
 
 .leader-name {
     font-size: 18px;
 
     font-weight: 700;
-}
-
-.leader-name:hover {
-    text-decoration: underline;
-
-    text-underline-offset: 5px;
 }
 
 .dots {
@@ -287,7 +369,62 @@ button {
 
     font-size: 15px;
 
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric:
+            tabular-nums;
+}
+
+/* =========================================================
+   SEARCH RESULT HIGHLIGHT
+========================================================= */
+
+.leader-row.search-highlight {
+    background:
+            rgba(25, 255, 99, 0.11);
+
+    border-color:
+            rgba(25, 255, 99, 0.7);
+
+    box-shadow:
+            inset
+            3px
+            0
+            0
+            var(--green);
+
+    color: #5dff91;
+}
+
+.leader-row.search-highlight::before {
+    content: "> FOUND";
+
+    position: absolute;
+
+    left: 0;
+
+    top: 2px;
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
+
+    color: var(--green);
+
+    opacity: 0.8;
+}
+
+.ranking-end {
+    padding:
+            38px
+            0
+            16px;
+
+    text-align: center;
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
+
+    opacity: 0.35;
 }
 
 /* =========================================================
@@ -313,7 +450,13 @@ button {
             var(--green);
 
     background:
-            rgba(0, 0, 0, 0.88);
+            rgba(0, 0, 0, 0.95);
+
+    box-shadow:
+            0
+            0
+            20px
+            rgba(25, 255, 99, 0.025);
 }
 
 .search-prompt {
@@ -366,7 +509,7 @@ button {
     flex:
             0
             0
-            80px;
+            76px;
 
     border: 0;
 
@@ -376,54 +519,48 @@ button {
 
     font-weight: 700;
 
-    font-size: 11px;
+    font-size: 10px;
+
+    letter-spacing: 1px;
 }
 
 .search-form button:hover {
     background: #54ff86;
 }
 
-.suggest-box {
+.search-status {
+    min-height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding:
+            10px
+            12px;
+
     border:
             1px
             solid
-            rgba(25, 255, 99, 0.3);
+            rgba(25, 255, 99, 0.22);
 
     border-top: 0;
 
-    padding: 16px;
+    background:
+            rgba(0, 0, 0, 0.96);
 
-    color: var(--green-soft);
+    font-size: 9px;
 
-    background: #000;
+    line-height: 1.5;
 
-    font-size: 11px;
-
-    line-height: 1.6;
+    letter-spacing: 1px;
 }
 
-.suggest-box button {
-    margin-top: 14px;
+.search-status.error {
+    color: var(--danger);
 
-    min-height: 42px;
-
-    padding:
-            0
-            14px;
-
-    border: 0;
-
-    color: #000;
-
-    background: var(--green);
-
-    font-weight: 700;
-}
-
-.suggest-box p {
-    margin-bottom: 0;
-
-    font-size: 10px;
+    border-color:
+            rgba(255, 79, 109, 0.35);
 }
 
 /* =========================================================
@@ -498,7 +635,7 @@ button {
 }
 
 /* =========================================================
-   TOAST
+   VOTE TOAST
 ========================================================= */
 
 .vote-toast {
@@ -508,7 +645,8 @@ button {
 
     left: 50%;
 
-    transform: translateX(-50%);
+    transform:
+            translateX(-50%);
 
     z-index: 1000;
 
@@ -520,9 +658,7 @@ button {
 
     max-width:
             calc(
-                    100vw
-                    -
-                    32px
+                    100vw - 32px
             );
 
     padding:
@@ -535,12 +671,7 @@ button {
             var(--green);
 
     background:
-            rgba(
-                    0,
-                    0,
-                    0,
-                    0.96
-            );
+            rgba(0, 0, 0, 0.96);
 
     color: var(--green);
 
@@ -558,12 +689,7 @@ button {
             0
             0
             24px
-            rgba(
-                    25,
-                    255,
-                    99,
-                    0.12
-            );
+            rgba(25, 255, 99, 0.12);
 
     pointer-events: none;
 
@@ -589,12 +715,7 @@ button {
             0
             0
             24px
-            rgba(
-                    255,
-                    79,
-                    109,
-                    0.1
-            );
+            rgba(255, 79, 109, 0.1);
 }
 
 @keyframes voteToastIn {
@@ -624,7 +745,11 @@ button {
 ========================================================= */
 
 .name-page {
-    width: min(820px, calc(100% - 36px));
+    width:
+            min(
+                    820px,
+                    calc(100% - 36px)
+            );
 
     margin: 0 auto;
 
@@ -692,7 +817,11 @@ button {
             auto
             24px;
 
-    width: min(500px, 100%);
+    width:
+            min(
+                    500px,
+                    100%
+            );
 
     border:
             1px
@@ -747,7 +876,11 @@ button {
 ========================================================= */
 
 footer {
-    width: min(1180px, calc(100% - 40px));
+    width:
+            min(
+                    1180px,
+                    calc(100% - 40px)
+            );
 
     margin: 0 auto;
 
@@ -772,7 +905,7 @@ footer {
 }
 
 /* =========================================================
-   MOBILE
+   TABLET / MOBILE
 ========================================================= */
 
 @media (max-width: 820px) {
@@ -780,23 +913,21 @@ footer {
     .hero {
         width:
                 calc(
-                        100%
-                        -
-                        28px
+                        100% - 28px
                 );
 
         padding:
-                52px
+                46px
                 0
-                42px;
+                38px;
     }
 
     .hero h1 {
         font-size:
                 clamp(
-                        40px,
-                        11vw,
-                        58px
+                        38px,
+                        10.5vw,
+                        56px
                 );
 
         line-height: 1.08;
@@ -815,46 +946,89 @@ footer {
     .main-layout {
         width:
                 calc(
-                        100%
-                        -
-                        28px
+                        100% - 28px
                 );
 
         grid-template-columns: 1fr;
 
-        gap: 28px;
+        gap: 0;
 
         margin-bottom: 72px;
     }
 
+    /*
+      На мобильном поиск становится sticky
+      прямо над рейтингом.
+    */
     .search-column {
-        position: static;
+        position: sticky;
+
+        top: 0;
+
+        z-index: 20;
 
         order: -1;
+
+        padding:
+                12px
+                0;
+
+        background:
+                rgba(0, 0, 0, 0.96);
+
+        backdrop-filter:
+                blur(8px);
+    }
+
+    .side-label {
+        display: none;
+    }
+
+    .search-hint {
+        display: none;
+    }
+
+    .search-status {
+        background: #000;
     }
 
     .leaderboard {
         padding:
-                16px
-                14px;
+                14px
+                12px;
     }
 
     .leaderboard-head {
-        font-size: 10px;
+        top: 82px;
 
-        letter-spacing: 1.5px;
+        margin:
+                -14px
+                -12px
+                6px;
+
+        padding:
+                0
+                12px;
+
+        min-height: 42px;
+
+        font-size: 9px;
+
+        letter-spacing: 1.4px;
     }
 
     .leader-row {
         grid-template-columns:
-      32px
-      minmax(90px, 1fr)
+      30px
+      minmax(86px, 1fr)
       auto
-      48px;
+      46px;
 
-        gap: 7px;
+        gap: 6px;
 
         min-height: 58px;
+
+        scroll-margin-top: 145px;
     }
 
     .dots {
@@ -866,7 +1040,7 @@ footer {
     }
 
     .rank {
-        font-size: 13px;
+        font-size: 12px;
     }
 
     .score {
@@ -876,28 +1050,35 @@ footer {
     }
 
     .compact .terminal-button {
-        width: 44px;
+        width: 42px;
 
-        min-width: 44px;
+        min-width: 42px;
 
-        height: 38px;
+        height: 36px;
 
         padding: 0;
 
-        font-size: 14px;
+        font-size: 13px;
+    }
+
+    .search-form {
+        min-height: 52px;
+    }
+
+    .search-form button {
+        flex-basis: 66px;
+
+        font-size: 9px;
     }
 
     .vote-toast {
         top: 16px;
 
-        width:
-                max-content;
+        width: max-content;
 
         max-width:
                 calc(
-                        100vw
-                        -
-                        28px
+                        100vw - 28px
                 );
 
         padding:
@@ -912,11 +1093,96 @@ footer {
     footer {
         width:
                 calc(
-                        100%
-                        -
-                        28px
+                        100% - 28px
                 );
 
         justify-content: center;
+    }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+
+    .hero {
+        padding-top: 38px;
+    }
+
+    .hero h1 {
+        font-size:
+                clamp(
+                        34px,
+                        10vw,
+                        44px
+                );
+    }
+
+    .hero-description {
+        margin-top: 22px;
+    }
+
+    .search-form input {
+        font-size: 11px;
+
+        padding:
+                12px
+                8px;
+    }
+
+    .search-prompt {
+        padding-left: 10px;
+
+        font-size: 17px;
+    }
+
+    .leaderboard {
+        padding:
+                12px
+                8px;
+    }
+
+    .leaderboard-head {
+        margin:
+                -12px
+                -8px
+                6px;
+
+        padding:
+                0
+                8px;
+    }
+
+    .leader-row {
+        grid-template-columns:
+      26px
+      minmax(76px, 1fr)
+      auto
+      40px;
+
+        gap: 5px;
+    }
+
+    .leader-name {
+        font-size: 13px;
+    }
+
+    .rank {
+        font-size: 11px;
+    }
+
+    .score {
+        font-size: 11px;
+    }
+
+    .compact .terminal-button {
+        width: 38px;
+
+        min-width: 38px;
+
+        height: 34px;
+
+        font-size: 12px;
     }
 }

@@ -23,11 +23,13 @@ async function getNames() {
 export default async function HomePage() {
     const names = await getNames();
 
-    const searchNames = names.map(({ id, name, slug }) => ({
-        id,
-        name,
-        slug,
-    }));
+    const searchNames = names.map(
+        ({ id, name, slug }) => ({
+            id,
+            name,
+            slug,
+        })
+    );
 
     return (
         <main className="page">
@@ -49,7 +51,7 @@ export default async function HomePage() {
 
             <section className="main-layout">
                 <div className="rating-column">
-                    <Leaderboard names={names} limit={10} />
+                    <Leaderboard names={names} />
                 </div>
 
                 <aside className="search-column">
@@ -58,6 +60,12 @@ export default async function HomePage() {
                     </div>
 
                     <SearchBox names={searchNames} />
+
+                    <div className="search-hint">
+                        ВВЕДИ ИМЯ
+                        <br />
+                        И МЫ НАЙДЁМ ЕГО В РЕЙТИНГЕ
+                    </div>
                 </aside>
             </section>
 

@@ -1,69 +1,158 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import {
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export default function SearchBox({ names }) {
   const [query, setQuery] = useState("");
-  const [showSuggest, setShowSuggest] = useState(false);
-  const [suggestionStatus, setSuggestionStatus] = useState("");
-  const router = useRouter();
+  const [status, setStatus] = useState("");
 
-  const match = useMemo(() => {
-    const q = query.trim().toLocaleLowerCase("ru-RU");
-    if (!q) return null;
-    return names.find((n) => n.name.toLocaleLowerCase("ru-RU") === q) || null;
-  }, [query, names]);
+  const highlightTimer = useRef(null);
+
+  const normalizedQuery = useMemo(() => {
+    return query
+        .trim()
+        .toLocaleLowerCase("ru-RU");
+  }, [query]);
+
+  function findName() {
+    if (!normalizedQuery) {
+      return null;
+    }
+
+    const exactMatch = names.find(
+        (item) =>
+            item.name.toLocaleLowerCase(
+                "ru-RU"
+            ) === normalizedQuery
+    );
+
+    if (exactMatch) {
+      return exactMatch;
+    }
+
+    const startsWithMatch = names.find(
+        (item) =>
+            item.name
+                .toLocaleLowerCase("ru-RU")
+                .startsWith(normalizedQuery)
+    );
+
+    if (startsWithMatch) {
+      return startsWithMatch;
+    }
+
+    return null;
+  }
+
+  function scrollToName(item) {
+    const element =
+        document.getElementById(
+            `name-${item.slug}`
+        );
+
+    if (!element) {
+      setStatus("ИМЯ НЕ НАЙДЕНО");
+      return;
+    }
+
+    document
+        .querySelectorAll(
+            ".leader-row.search-highlight"
+        )
+        .forEach((row) => {
+          row.classList.remove(
+              "search-highlight"
+          );
+        });
+
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    window.setTimeout(() => {
+      element.classList.add(
+          "search-highlight"
+      );
+    }, 350);
+
+    if (highlightTimer.current) {
+      clearTimeout(
+          highlightTimer.current
+      );
+    }
+
+    highlightTimer.current =
+        setTimeout(() => {
+          element.classList.remove(
+              "search-highlight"
+          );
+        }, 3000);
+
+    const position =
+        names.findIndex(
+            (name) => name.id === item.id
+        ) + 1;
+
+    setStatus(
+        `НАЙДЕНО · ${item.name.toUpperCase()} · #${position}`
+    );
+  }
 
   function submit(event) {
     event.preventDefault();
-    if (match) {
-      router.push(`/name/${match.slug}`);
+
+    const match = findName();
+
+    if (!match) {
+      setStatus("ИМЯ НЕ НАЙДЕНО");
       return;
     }
-    if (query.trim().length >= 2) setShowSuggest(true);
-  }
 
-  async function suggest() {
-    setSuggestionStatus("Отправляем...");
-    const response = await fetch("/api/names/suggest", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: query }),
-    });
-    const data = await response.json();
-
-    if (response.ok) {
-      setSuggestionStatus(data.alreadyExists ? "Это имя уже есть в рейтинге." : data.alreadySuggested ? "Имя уже ждёт проверки." : "Готово. Имя отправлено на проверку.");
-    } else {
-      setSuggestionStatus(data.error || "Не удалось отправить имя.");
-    }
+    scrollToName(match);
   }
 
   return (
-    <div className="search-block">
-      <form className="search-form" onSubmit={submit}>
-        <span className="search-prompt">&gt;</span>
-        <input
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setShowSuggest(false);
-            setSuggestionStatus("");
-          }}
-          placeholder="НАЙТИ СВОЁ ИМЯ_"
-          aria-label="Найти имя"
-        />
-        <button type="submit">ENTER</button>
-      </form>
+      <div className="search-block">
+        <form
+            className="search-form"
+            onSubmit={submit}
+        >
+        <span className="search-prompt">
+          &gt;
+        </span>
 
-      {showSuggest && !match ? (
-        <div className="suggest-box">
-          <div>ИМЯ «{query.trim()}» НЕ НАЙДЕНО.</div>
-          <button onClick={suggest}>ПРЕДЛОЖИТЬ ИМЯ</button>
-          {suggestionStatus ? <p>{suggestionStatus}</p> : null}
-        </div>
-      ) : null}
-    </div>
+          <input
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setStatus("");
+              }}
+              placeholder="ИМЯ_"
+              aria-label="Найти имя"
+              autoComplete="off"
+          />
+
+          <button type="submit">
+            FIND
+          </button>
+        </form>
+
+        {status ? (
+            <div
+                className={
+                  status === "ИМЯ НЕ НАЙДЕНО"
+                      ? "search-status error"
+                      : "search-status"
+                }
+            >
+              &gt; {status}
+            </div>
+        ) : null}
+      </div>
   );
 }
