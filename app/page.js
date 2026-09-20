@@ -24,6 +24,25 @@ export default async function HomePage() {
 
     return (
         <main className="page">
+            <header className="topbar">
+                <nav className="topbar-left">
+                    <a href="#leaderboard">РЕЙТИНГ</a>
+                    <a href="#about">О ПРОЕКТЕ</a>
+                    <a href="#faq">FAQ</a>
+                </nav>
+
+                <div className="topbar-brand">
+                    <div className="brand-wordmark">ИМЯ.</div>
+                    <div className="brand-subtitle">
+                        БОЛЬШЕ, ЧЕМ ПРОСТО ИМЯ
+                    </div>
+                </div>
+
+                <div className="topbar-right">
+                    <a href="#search">НАЙТИ</a>
+                </div>
+            </header>
+
             <section className="hero">
                 <div className="hero-mascot">
                     <img
@@ -32,26 +51,26 @@ export default async function HomePage() {
                     />
                 </div>
 
-                <h1>
-                    КАКОЕ ЖЕНСКОЕ ИМЯ
+                <h1 className="hero-title">
+                    КАКОЕ ЖЕНСКОЕ ИМЯ №1
                     <br />
-                    №1 В РОССИИ?
+                    В РОССИИ?
                 </h1>
 
                 <p className="hero-description">
                     Голосуй за своё имя и поднимай его в рейтинге.
                 </p>
-
-                <p className="rule">
-                    1 ЧЕЛОВЕК = 1 ГОЛОС В ДЕНЬ
-                </p>
             </section>
 
             <RankingExperience names={names} />
 
-            <footer>
-                <span>© 2026</span>
-            </footer>
+            <section id="about" className="bottom-copy">
+                <p>ИМЕНА ДЕЛАЮТ МИР ЯРЧЕ ♥</p>
+            </section>
+
+            <section id="faq" className="faq-note">
+                <p>1 ЧЕЛОВЕК = 1 ГОЛОС В ДЕНЬ</p>
+            </section>
         </main>
     );
 }
