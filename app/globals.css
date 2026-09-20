@@ -258,7 +258,8 @@ button {
 
     font-size: 17px;
 
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric:
+            tabular-nums;
 }
 
 .leader-name {
@@ -282,11 +283,12 @@ button {
 
     font-size: 16px;
 
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric:
+            tabular-nums;
 }
 
 /* =========================================================
-   FOUND NAME
+   SELECTED NAME
 ========================================================= */
 
 .highlighted-row {
@@ -432,6 +434,8 @@ button {
 
     font-size: 10px;
 
+    line-height: 1.5;
+
     letter-spacing: 1px;
 }
 
@@ -440,6 +444,93 @@ button {
 
     border-color:
             rgba(255, 79, 109, 0.35);
+}
+
+/* =========================================================
+   ADD NAME
+========================================================= */
+
+.add-name-box {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding:
+            15px
+            14px;
+
+    border:
+            1px
+            solid
+            rgba(25, 255, 99, 0.24);
+
+    border-top: 0;
+
+    background:
+            rgba(0, 0, 0, 0.96);
+}
+
+.add-name-question {
+    color:
+            rgba(164, 255, 192, 0.72);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
+    letter-spacing: 0.5px;
+}
+
+.add-name-button {
+    flex-shrink: 0;
+
+    min-height: 38px;
+
+    padding:
+            0
+            13px;
+
+    border:
+            1px
+            solid
+            var(--green);
+
+    background:
+            transparent;
+
+    color:
+            var(--green);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    white-space: nowrap;
+
+    transition:
+            background
+            0.12s ease,
+            color
+            0.12s ease;
+}
+
+.add-name-button:hover {
+    background:
+            var(--green);
+
+    color: #000;
+}
+
+.add-name-button:disabled {
+    opacity: 0.55;
+
+    cursor: wait;
 }
 
 /* =========================================================
@@ -536,15 +627,20 @@ button {
             solid
             var(--green);
 
-    background: transparent;
+    background:
+            transparent;
 
-    color: var(--green);
+    color:
+            var(--green);
 
-    text-transform: uppercase;
+    text-transform:
+            uppercase;
 
     transition:
-            background 0.12s ease,
-            color 0.12s ease;
+            background
+            0.12s ease,
+            color
+            0.12s ease;
 }
 
 .compact .terminal-button {
@@ -566,12 +662,15 @@ button {
 }
 
 .terminal-button:hover {
-    background: var(--green);
+    background:
+            var(--green);
 
     color: #000;
 }
 
-.terminal-button[aria-busy="true"] {
+.terminal-button[
+  aria-busy="true"
+] {
     cursor: wait;
 }
 
@@ -611,7 +710,8 @@ button {
     background:
             rgba(0, 0, 0, 0.97);
 
-    color: var(--green);
+    color:
+            var(--green);
 
     font-size: 12px;
 
@@ -619,7 +719,8 @@ button {
 
     letter-spacing: 1px;
 
-    text-transform: uppercase;
+    text-transform:
+            uppercase;
 
     box-shadow:
             0
@@ -641,9 +742,11 @@ button {
 
 .vote-toast.blocked,
 .vote-toast.error {
-    border-color: var(--danger);
+    border-color:
+            var(--danger);
 
-    color: var(--danger);
+    color:
+            var(--danger);
 }
 
 @keyframes voteToastIn {
@@ -705,11 +808,15 @@ footer {
    MOBILE
 ========================================================= */
 
-@media (max-width: 820px) {
+@media (
+max-width: 820px
+) {
 
     .hero {
         width:
-                calc(100% - 28px);
+                calc(
+                        100% - 28px
+                );
 
         padding:
                 42px
@@ -742,9 +849,12 @@ footer {
 
     .main-layout {
         width:
-                calc(100% - 28px);
+                calc(
+                        100% - 28px
+                );
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+      1fr;
 
         gap: 24px;
 
@@ -774,7 +884,10 @@ footer {
     .leader-row {
         grid-template-columns:
       34px
-      minmax(90px, 1fr)
+      minmax(
+        90px,
+        1fr
+      )
       auto
       46px;
 
@@ -801,7 +914,8 @@ footer {
         font-size: 13px;
     }
 
-    .compact .terminal-button {
+    .compact
+    .terminal-button {
         width: 42px;
 
         min-width: 42px;
@@ -815,27 +929,54 @@ footer {
         flex-basis: 82px;
     }
 
+    .add-name-box {
+        padding:
+                13px
+                12px;
+    }
+
+    .add-name-question {
+        font-size: 9px;
+    }
+
+    .add-name-button {
+        min-height: 36px;
+
+        padding:
+                0
+                10px;
+
+        font-size: 8px;
+    }
+
     .local-ranking {
         margin-top: 18px;
     }
 
-    .local-ranking .leader-row {
+    .local-ranking
+    .leader-row {
         grid-template-columns:
       40px
-      minmax(84px, 1fr)
+      minmax(
+        84px,
+        1fr
+      )
       auto
       42px;
     }
 
-    .local-ranking .leader-name {
+    .local-ranking
+    .leader-name {
         font-size: 15px;
     }
 
-    .local-ranking .rank {
+    .local-ranking
+    .rank {
         font-size: 13px;
     }
 
-    .local-ranking .score {
+    .local-ranking
+    .score {
         font-size: 13px;
     }
 
@@ -855,8 +996,11 @@ footer {
 
     footer {
         width:
-                calc(100% - 28px);
+                calc(
+                        100% - 28px
+                );
 
-        justify-content: center;
+        justify-content:
+                center;
     }
 }
