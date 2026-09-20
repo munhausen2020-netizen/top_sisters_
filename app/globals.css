@@ -29,7 +29,7 @@ body {
 
     background-image:
             linear-gradient(
-                    rgba(23, 255, 95, 0.025) 1px,
+                    rgba(23, 255, 95, 0.022) 1px,
                     transparent 1px
             );
 
@@ -38,15 +38,16 @@ body {
     color: var(--green);
 
     font-family:
-            "Courier New",
-            "DejaVu Sans Mono",
+            var(--font-pixel),
             monospace;
 
-    text-rendering:
-            geometricPrecision;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+
+    text-rendering: optimizeSpeed;
 
     text-shadow:
-            0 0 5px
+            0 0 4px
             rgba(23, 255, 95, 0.14);
 }
 
@@ -63,13 +64,13 @@ body::after {
     background:
             repeating-linear-gradient(
                     to bottom,
-                    rgba(255, 255, 255, 0.015) 0px,
-                    rgba(255, 255, 255, 0.015) 1px,
+                    rgba(255, 255, 255, 0.012) 0px,
+                    rgba(255, 255, 255, 0.012) 1px,
                     rgba(0, 0, 0, 0) 1px,
                     rgba(0, 0, 0, 0) 4px
             );
 
-    opacity: 0.35;
+    opacity: 0.34;
 }
 
 button,
@@ -105,29 +106,26 @@ img {
     padding:
             38px
             0
-            26px;
+            28px;
 
     text-align: center;
 }
 
 .hero-mascot {
-    width: 170px;
+    width: 160px;
 
     margin:
             0
             auto
-            14px;
+            18px;
 }
 
 .hero-mascot img {
     width: 100%;
     height: auto;
 
-    image-rendering:
-            pixelated;
-
-    image-rendering:
-            crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 .hero-title {
@@ -135,48 +133,53 @@ img {
 
     font-size:
             clamp(
-                    42px,
-                    5.8vw,
-                    78px
+                    28px,
+                    4.4vw,
+                    52px
             );
 
-    line-height: 0.98;
+    line-height: 1.45;
 
-    font-weight: 700;
+    font-weight: 400;
 
-    letter-spacing: -2px;
+    letter-spacing: 0;
 
     text-transform: uppercase;
 
     text-shadow:
-            4px 0 0 rgba(23, 255, 95, 0.03);
+            2px
+            0
+            0
+            rgba(23, 255, 95, 0.04);
 }
 
 .hero-description {
     margin:
-            20px
+            22px
             0
             0;
 
     color:
             var(--green-soft);
 
-    font-size: 17px;
+    font-size: 12px;
 
-    line-height: 1.4;
+    line-height: 1.8;
 
-    letter-spacing: 0.5px;
+    letter-spacing: 0;
 }
 
 .rule {
     margin:
-            14px
+            16px
             0
             0;
 
-    font-size: 10px;
+    font-size: 8px;
 
-    letter-spacing: 3px;
+    line-height: 1.8;
+
+    letter-spacing: 1px;
 
     opacity: 0.72;
 }
@@ -233,7 +236,7 @@ img {
             4px
             4px
             0
-            rgba(23, 255, 95, 0.1);
+            rgba(23, 255, 95, 0.08);
 }
 
 .search-prompt {
@@ -250,9 +253,7 @@ img {
 
     justify-content: center;
 
-    font-size: 22px;
-
-    font-weight: 700;
+    font-size: 14px;
 }
 
 .search-form input {
@@ -274,25 +275,25 @@ img {
     color:
             var(--green);
 
-    font-size: 15px;
+    font-size: 10px;
 
-    font-weight: 700;
+    line-height: 1.4;
 
-    letter-spacing: 1px;
+    letter-spacing: 0;
 
     text-transform: uppercase;
 }
 
 .search-form input::placeholder {
     color:
-            rgba(23, 255, 95, 0.42);
+            rgba(23, 255, 95, 0.4);
 }
 
 .search-form button {
     flex:
             0
             0
-            92px;
+            100px;
 
     border: 0;
 
@@ -307,11 +308,11 @@ img {
     color:
             #000;
 
-    font-size: 11px;
+    font-size: 8px;
 
-    font-weight: 700;
+    line-height: 1.4;
 
-    letter-spacing: 1px;
+    letter-spacing: 0;
 
     text-transform: uppercase;
 }
@@ -322,14 +323,14 @@ img {
 }
 
 .search-status {
-    min-height: 38px;
+    min-height: 40px;
 
     display: flex;
 
     align-items: center;
 
     padding:
-            8px
+            9px
             12px;
 
     border:
@@ -342,11 +343,11 @@ img {
     background:
             #000;
 
-    font-size: 10px;
+    font-size: 8px;
 
-    font-weight: 700;
+    line-height: 1.6;
 
-    letter-spacing: 0.8px;
+    letter-spacing: 0;
 
     text-transform: uppercase;
 }
@@ -387,18 +388,16 @@ img {
 }
 
 .add-name-question {
-    font-size: 10px;
+    font-size: 8px;
 
-    font-weight: 700;
-
-    letter-spacing: 0.7px;
+    line-height: 1.6;
 
     color:
             var(--green-soft);
 }
 
 .add-name-button {
-    min-height: 34px;
+    min-height: 36px;
 
     padding:
             0
@@ -415,11 +414,9 @@ img {
     color:
             var(--green);
 
-    font-size: 9px;
+    font-size: 7px;
 
-    font-weight: 700;
-
-    letter-spacing: 0.8px;
+    line-height: 1.4;
 
     text-transform: uppercase;
 }
@@ -454,13 +451,13 @@ img {
             #000;
 
     padding:
-            12px
+            14px
             16px
-            14px;
+            16px;
 
     box-shadow:
-            5px
-            5px
+            4px
+            4px
             0
             rgba(23, 255, 95, 0.06);
 }
@@ -474,18 +471,16 @@ img {
 
     justify-content: space-between;
 
-    padding-bottom: 8px;
+    padding-bottom: 10px;
 
     border-bottom:
             2px
             solid
-            rgba(23, 255, 95, 0.28);
+            rgba(23, 255, 95, 0.26);
 
-    font-size: 11px;
+    font-size: 8px;
 
-    font-weight: 700;
-
-    letter-spacing: 2px;
+    line-height: 1.5;
 
     text-transform: uppercase;
 }
@@ -500,26 +495,26 @@ img {
     display: grid;
 
     grid-template-columns:
-    44px
-    minmax(126px, auto)
+    48px
+    minmax(160px, auto)
     1fr
     auto
-    50px;
+    56px;
 
-    gap: 9px;
+    gap: 10px;
 
     align-items: center;
 
-    min-height: 44px;
+    min-height: 42px;
 
     padding:
-            2px
+            1px
             0;
 
     border-top:
             1px
             dashed
-            rgba(23, 255, 95, 0.16);
+            rgba(23, 255, 95, 0.14);
 }
 
 .leaderboard-list
@@ -529,24 +524,20 @@ img {
 }
 
 .rank {
-    font-size: 16px;
+    font-size: 12px;
 
-    font-weight: 700;
+    line-height: 1;
 
-    letter-spacing: 1px;
-
-    opacity: 0.78;
+    opacity: 0.8;
 
     font-variant-numeric:
             tabular-nums;
 }
 
 .leader-name {
-    font-size: 18px;
+    font-size: 13px;
 
-    font-weight: 700;
-
-    letter-spacing: 0.2px;
+    line-height: 1.2;
 
     text-transform: uppercase;
 }
@@ -556,17 +547,19 @@ img {
 
     white-space: nowrap;
 
-    opacity: 0.2;
+    opacity: 0.24;
+
+    font-size: 10px;
 }
 
 .score {
-    min-width: 68px;
+    min-width: 78px;
 
     text-align: right;
 
-    font-size: 15px;
+    font-size: 11px;
 
-    font-weight: 700;
+    line-height: 1;
 
     font-variant-numeric:
             tabular-nums;
@@ -578,11 +571,11 @@ img {
 
 .highlighted-row {
     background:
-            rgba(23, 255, 95, 0.1);
+            rgba(23, 255, 95, 0.09);
 
     box-shadow:
             inset
-            5px
+            4px
             0
             0
             var(--green);
@@ -628,17 +621,15 @@ img {
     color:
             var(--green);
 
-    font-weight: 700;
-
     transition:
             none;
 }
 
 .compact
 .terminal-button {
-    width: 46px;
+    width: 48px;
 
-    min-width: 46px;
+    min-width: 48px;
 
     height: 32px;
 
@@ -650,7 +641,9 @@ img {
 
     justify-content: center;
 
-    font-size: 13px;
+    font-size: 9px;
+
+    line-height: 1;
 }
 
 .terminal-button:hover {
@@ -708,11 +701,9 @@ img {
     color:
             var(--green);
 
-    font-size: 11px;
+    font-size: 8px;
 
-    font-weight: 700;
-
-    letter-spacing: 1px;
+    line-height: 1.6;
 
     text-transform: uppercase;
 
@@ -726,7 +717,7 @@ img {
 }
 
 .vote-toast-prompt {
-    font-size: 16px;
+    font-size: 12px;
 }
 
 .vote-toast.blocked,
@@ -752,71 +743,73 @@ max-width: 700px
                         100% - 24px
                 );
 
-        padding-top: 28px;
+        padding-top: 26px;
     }
 
     .hero-mascot {
-        width: 128px;
+        width: 120px;
 
-        margin-bottom: 12px;
+        margin-bottom: 14px;
     }
 
     .hero-title {
         font-size:
                 clamp(
-                        34px,
-                        10vw,
-                        48px
+                        20px,
+                        6.2vw,
+                        32px
                 );
 
-        line-height: 1;
+        line-height: 1.55;
     }
 
     .hero-description {
-        margin-top: 16px;
-
-        font-size: 13px;
-    }
-
-    .rule {
-        margin-top: 12px;
+        margin-top: 14px;
 
         font-size: 8px;
 
-        letter-spacing: 2px;
+        line-height: 1.8;
+    }
+
+    .rule {
+        margin-top: 10px;
+
+        font-size: 6px;
+
+        line-height: 1.8;
     }
 
     .ranking-shell {
         width:
                 calc(
-                        100% - 20px
+                        100% - 18px
                 );
     }
 
     .search-form {
-        min-height: 52px;
+        min-height: 50px;
     }
 
     .search-prompt {
-        width: 38px;
+        width: 36px;
 
-        flex-basis: 38px;
+        flex-basis: 36px;
 
-        font-size: 18px;
+        font-size: 10px;
     }
 
     .search-form input {
-        font-size: 12px;
+        font-size: 8px;
 
         padding:
                 0
-                8px;
+                7px;
     }
 
     .search-form button {
-        flex-basis: 78px;
+        flex-basis: 76px;
 
-        font-size: 9px;
+        font-size: 6px;
     }
 
     .leaderboard {
@@ -827,26 +820,26 @@ max-width: 700px
     }
 
     .leaderboard-head {
-        min-height: 32px;
+        min-height: 30px;
 
-        font-size: 9px;
+        font-size: 6px;
 
-        letter-spacing: 1.4px;
+        line-height: 1.5;
     }
 
     .leader-row {
         grid-template-columns:
-      30px
+      34px
       minmax(
-        82px,
+        92px,
         1fr
       )
       auto
-      40px;
+      42px;
 
         gap: 5px;
 
-        min-height: 38px;
+        min-height: 36px;
 
         padding:
                 1px
@@ -858,17 +851,19 @@ max-width: 700px
     }
 
     .rank {
-        font-size: 12px;
+        font-size: 8px;
     }
 
     .leader-name {
-        font-size: 14px;
+        font-size: 9px;
+
+        line-height: 1.25;
     }
 
     .score {
         min-width: 0;
 
-        font-size: 12px;
+        font-size: 8px;
     }
 
     .compact
@@ -879,7 +874,7 @@ max-width: 700px
 
         height: 28px;
 
-        font-size: 11px;
+        font-size: 7px;
     }
 
     .highlighted-row {
@@ -892,9 +887,21 @@ max-width: 700px
         align-items: stretch;
     }
 
+    .add-name-question {
+        font-size: 7px;
+    }
+
+    .add-name-button {
+        font-size: 6px;
+    }
+
+    .search-status {
+        font-size: 6px;
+    }
+
     .vote-toast {
         top: 12px;
 
-        font-size: 9px;
+        font-size: 6px;
     }
 }
