@@ -21,11 +21,11 @@ body {
 
     background-image:
             linear-gradient(
-                    rgba(25, 255, 99, 0.018) 1px,
+                    rgba(25, 255, 99, 0.024) 1px,
                     transparent 1px
             );
 
-    background-size: 100% 4px;
+    background-size: 100% 3px;
 
     color: var(--green);
 
@@ -37,7 +37,7 @@ body {
     min-height: 100vh;
 
     text-shadow:
-            0 0 6px rgba(25, 255, 99, 0.11);
+            0 0 7px rgba(25, 255, 99, 0.12);
 }
 
 body::after {
@@ -52,12 +52,12 @@ body::after {
             linear-gradient(
                     to bottom,
                     transparent 50%,
-                    rgba(0, 0, 0, 0.08) 50%
+                    rgba(0, 0, 0, 0.1) 50%
             );
 
-    background-size: 100% 4px;
+    background-size: 100% 3px;
 
-    opacity: 0.18;
+    opacity: 0.22;
 
     z-index: 100;
 }
@@ -69,6 +69,11 @@ input {
 
 button {
     cursor: pointer;
+}
+
+img {
+    display: block;
+    max-width: 100%;
 }
 
 .page {
@@ -89,11 +94,41 @@ button {
     margin: 0 auto;
 
     padding:
-            64px
+            52px
             0
             50px;
 
     text-align: center;
+}
+
+.hero-mascot {
+    width: 132px;
+
+    margin:
+            0
+            auto
+            20px;
+
+    padding: 8px;
+
+    border:
+            1px
+            solid
+            rgba(25, 255, 99, 0.22);
+
+    background:
+            rgba(0, 0, 0, 0.72);
+
+    box-shadow:
+            0 0 20px rgba(25, 255, 99, 0.06);
+}
+
+.hero-mascot img {
+    width: 100%;
+    height: auto;
+
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 .hero h1 {
@@ -108,29 +143,33 @@ button {
                     88px
             );
 
-    line-height: 1.04;
+    line-height: 1.02;
 
     letter-spacing: -1px;
 
     font-weight: 700;
+
+    text-transform: uppercase;
 }
 
 .hero-description {
     margin:
-            30px
+            26px
             0
             0;
 
     color: var(--green-soft);
 
-    opacity: 0.82;
+    opacity: 0.84;
 
-    font-size: 18px;
+    font-size: 19px;
+
+    line-height: 1.45;
 }
 
 .rule {
     margin:
-            24px
+            22px
             0
             0;
 
@@ -192,7 +231,10 @@ button {
             22px;
 
     background:
-            rgba(0, 0, 0, 0.8);
+            rgba(0, 0, 0, 0.84);
+
+    box-shadow:
+            0 0 24px rgba(25, 255, 99, 0.05);
 }
 
 .leaderboard-head,
@@ -206,6 +248,8 @@ button {
     font-size: 12px;
 
     letter-spacing: 2px;
+
+    text-transform: uppercase;
 }
 
 .leaderboard-head {
@@ -223,8 +267,8 @@ button {
     display: grid;
 
     grid-template-columns:
-    50px
-    minmax(135px, auto)
+    54px
+    minmax(150px, auto)
     1fr
     auto
     62px;
@@ -233,7 +277,7 @@ button {
 
     align-items: center;
 
-    min-height: 64px;
+    min-height: 68px;
 
     border-top:
             1px
@@ -254,18 +298,24 @@ button {
 
     z-index: 2;
 
-    opacity: 0.72;
+    opacity: 0.78;
 
-    font-size: 17px;
+    font-size: 18px;
 
     font-variant-numeric:
             tabular-nums;
+
+    letter-spacing: 1px;
 }
 
 .leader-name {
-    font-size: 20px;
+    font-size: 21px;
 
     font-weight: 700;
+
+    letter-spacing: 0.4px;
+
+    text-transform: uppercase;
 }
 
 .dots {
@@ -273,15 +323,15 @@ button {
 
     white-space: nowrap;
 
-    opacity: 0.2;
+    opacity: 0.18;
 }
 
 .score {
-    min-width: 78px;
+    min-width: 84px;
 
     text-align: right;
 
-    font-size: 16px;
+    font-size: 17px;
 
     font-variant-numeric:
             tabular-nums;
@@ -327,6 +377,8 @@ button {
     letter-spacing: 3px;
 
     opacity: 0.72;
+
+    text-transform: uppercase;
 }
 
 .search-form {
@@ -343,6 +395,9 @@ button {
 
     background:
             rgba(0, 0, 0, 0.95);
+
+    box-shadow:
+            0 0 20px rgba(25, 255, 99, 0.04);
 }
 
 .search-prompt {
@@ -408,6 +463,8 @@ button {
     font-weight: 700;
 
     letter-spacing: 1px;
+
+    text-transform: uppercase;
 }
 
 .search-form button:hover {
@@ -437,6 +494,8 @@ button {
     line-height: 1.5;
 
     letter-spacing: 1px;
+
+    text-transform: uppercase;
 }
 
 .search-status.error {
@@ -483,6 +542,8 @@ button {
     line-height: 1.5;
 
     letter-spacing: 0.5px;
+
+    text-transform: uppercase;
 }
 
 .add-name-button {
@@ -513,11 +574,11 @@ button {
 
     white-space: nowrap;
 
+    text-transform: uppercase;
+
     transition:
-            background
-            0.12s ease,
-            color
-            0.12s ease;
+            background 0.12s ease,
+            color 0.12s ease;
 }
 
 .add-name-button:hover {
@@ -546,6 +607,9 @@ button {
             rgba(25, 255, 99, 0.48);
 
     background: #000;
+
+    box-shadow:
+            0 0 18px rgba(25, 255, 99, 0.04);
 }
 
 .local-ranking-head {
@@ -571,12 +635,12 @@ button {
 
 .local-ranking .leader-row {
     grid-template-columns:
-    46px
+    48px
     minmax(92px, 1fr)
     auto
     50px;
 
-    min-height: 58px;
+    min-height: 60px;
 
     gap: 8px;
 }
@@ -586,11 +650,11 @@ button {
 }
 
 .local-ranking .leader-name {
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .local-ranking .rank {
-    font-size: 14px;
+    font-size: 15px;
 
     white-space: nowrap;
 }
@@ -598,7 +662,7 @@ button {
 .local-ranking .score {
     min-width: 0;
 
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .local-ranking .highlighted-row {
@@ -637,10 +701,8 @@ button {
             uppercase;
 
     transition:
-            background
-            0.12s ease,
-            color
-            0.12s ease;
+            background 0.12s ease,
+            color 0.12s ease;
 }
 
 .compact .terminal-button {
@@ -802,26 +864,30 @@ footer {
     letter-spacing: 3px;
 
     opacity: 0.45;
+
+    text-transform: uppercase;
 }
 
 /* =========================================================
    MOBILE
 ========================================================= */
 
-@media (
-max-width: 820px
-) {
+@media (max-width: 820px) {
 
     .hero {
         width:
-                calc(
-                        100% - 28px
-                );
+                calc(100% - 28px);
 
         padding:
-                42px
+                40px
                 0
-                36px;
+                34px;
+    }
+
+    .hero-mascot {
+        width: 108px;
+
+        margin-bottom: 18px;
     }
 
     .hero h1 {
@@ -836,7 +902,7 @@ max-width: 820px
     }
 
     .hero-description {
-        margin-top: 22px;
+        margin-top: 20px;
 
         font-size: 14px;
     }
@@ -849,9 +915,7 @@ max-width: 820px
 
     .main-layout {
         width:
-                calc(
-                        100% - 28px
-                );
+                calc(100% - 28px);
 
         grid-template-columns:
       1fr;
@@ -883,17 +947,14 @@ max-width: 820px
 
     .leader-row {
         grid-template-columns:
-      34px
-      minmax(
-        90px,
-        1fr
-      )
+      36px
+      minmax(90px, 1fr)
       auto
       46px;
 
         gap: 7px;
 
-        min-height: 58px;
+        min-height: 60px;
     }
 
     .dots {
@@ -905,7 +966,7 @@ max-width: 820px
     }
 
     .leader-name {
-        font-size: 15px;
+        font-size: 16px;
     }
 
     .score {
@@ -914,8 +975,7 @@ max-width: 820px
         font-size: 13px;
     }
 
-    .compact
-    .terminal-button {
+    .compact .terminal-button {
         width: 42px;
 
         min-width: 42px;
@@ -953,30 +1013,23 @@ max-width: 820px
         margin-top: 18px;
     }
 
-    .local-ranking
-    .leader-row {
+    .local-ranking .leader-row {
         grid-template-columns:
       40px
-      minmax(
-        84px,
-        1fr
-      )
+      minmax(84px, 1fr)
       auto
       42px;
     }
 
-    .local-ranking
-    .leader-name {
+    .local-ranking .leader-name {
         font-size: 15px;
     }
 
-    .local-ranking
-    .rank {
+    .local-ranking .rank {
         font-size: 13px;
     }
 
-    .local-ranking
-    .score {
+    .local-ranking .score {
         font-size: 13px;
     }
 
@@ -996,9 +1049,7 @@ max-width: 820px
 
     footer {
         width:
-                calc(
-                        100% - 28px
-                );
+                calc(100% - 28px);
 
         justify-content:
                 center;

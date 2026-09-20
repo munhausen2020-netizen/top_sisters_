@@ -25,6 +25,13 @@ export default async function HomePage() {
     return (
         <main className="page">
             <section className="hero">
+                <div className="hero-mascot">
+                    <img
+                        src="/pixel-princess.png"
+                        alt="Pixel princess"
+                    />
+                </div>
+
                 <h1>
                     КАКОЕ ЖЕНСКОЕ ИМЯ
                     <br />
