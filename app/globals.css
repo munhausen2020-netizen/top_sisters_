@@ -500,7 +500,7 @@ img {
 
 .local-ranking .leader-row {
     grid-template-columns:
-    48px
+    58px
     minmax(140px, auto)
     1fr
     auto
@@ -516,7 +516,15 @@ img {
 }
 
 .local-ranking .rank {
+    position: relative;
+
+    z-index: 2;
+
     font-size: 11px;
+
+    white-space: nowrap;
+
+    opacity: 0.9;
 }
 
 .local-ranking .leader-name {
@@ -623,6 +631,10 @@ img {
 }
 
 .rank {
+    position: relative;
+
+    z-index: 2;
+
     font-size: 12px;
 
     line-height: 1;
@@ -669,6 +681,8 @@ img {
 ========================================================= */
 
 .highlighted-row {
+    position: relative;
+
     background:
             rgba(23, 255, 95, 0.1);
 
@@ -678,18 +692,29 @@ img {
             0
             0
             var(--green);
-
-    padding-left: 8px;
 }
 
-.highlighted-row
-.leader-name,
+/*
+  ВАЖНО:
+  никакого padding-left здесь нет.
+  Поэтому номер строки больше не сдвигается
+  и не залезает под зелёную полоску.
+*/
+
 .highlighted-row
 .rank {
+    padding-left: 10px;
+
     color:
             #66ff98;
 
     opacity: 1;
+}
+
+.highlighted-row
+.leader-name {
+    color:
+            #66ff98;
 }
 
 /* =========================================================
@@ -947,7 +972,7 @@ max-width: 700px
     .local-ranking
     .leader-row {
         grid-template-columns:
-      34px
+      40px
       minmax(
         92px,
         1fr
@@ -972,6 +997,8 @@ max-width: 700px
     .local-ranking
     .rank {
         font-size: 8px;
+
+        white-space: nowrap;
     }
 
     .leader-name,
@@ -1002,7 +1029,12 @@ max-width: 700px
     }
 
     .highlighted-row {
-        padding-left: 6px;
+        padding-left: 0;
+    }
+
+    .highlighted-row
+    .rank {
+        padding-left: 8px;
     }
 
     .add-name-box {
