@@ -28,6 +28,9 @@ const OPENAI_MODEL =
 const MAX_NAME_ATTEMPTS_PER_DAY =
     10;
 
+const AUTO_APPROVE_CONFIDENCE =
+    0.7;
+
 function getTodayUtc() {
   return new Date()
       .toISOString()
@@ -71,12 +74,23 @@ function parseAiJson(text) {
       text || ""
   )
       .trim()
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/i, "");
+      .replace(
+          /^```json\s*/i,
+          ""
+      )
+      .replace(
+          /^```\s*/i,
+          ""
+      )
+      .replace(
+          /\s*```$/i,
+          ""
+      );
 
   try {
-    return JSON.parse(cleaned);
+    return JSON.parse(
+        cleaned
+    );
   } catch {
     return null;
   }
@@ -97,45 +111,76 @@ async function validateWithAi(
   const prompt = `
 Ты модерируешь рейтинг женских личных имён.
 
-Нужно определить, является ли строка реальным женским личным именем.
-
-Имя пользователя:
+Пользователь предлагает имя:
 "${name}"
 
-Учитывай:
-- русские имена;
+Твоя задача — определить, можно ли считать эту строку реальным женским личным именем.
+
+ОЧЕНЬ ВАЖНО:
+не отправляй имя на REVIEW только потому, что оно редкое, региональное или тебе плохо знакомо.
+
+Особенно учитывай реальные имена следующих групп:
+- русские;
 - татарские;
 - башкирские;
 - чеченские;
+- ингушские;
 - дагестанские;
+- аварские;
+- даргинские;
+- лезгинские;
+- кумыкские;
+- лакские;
+- табасаранские;
+- азербайджанские;
+- казахские;
+- киргизские;
+- узбекские;
+- таджикские;
+- турецкие;
+- арабские;
+- персидские;
+- мусульманские;
 - кавказские;
 - тюркские;
-- арабские;
-- мусульманские;
 - европейские;
 - азиатские;
+- африканские;
 - другие реальные иностранные женские имена.
 
-Не отклоняй имя только потому, что оно редкое.
+Если имя редкое, но выглядит как правдоподобное реальное женское имя и ты считаешь, что оно действительно используется как личное имя — выбирай ACCEPT.
 
 ACCEPT:
-реальное женское личное имя или распространённый самостоятельный вариант женского имени.
+- реальное женское личное имя;
+- редкое региональное женское имя;
+- иностранное женское имя;
+- традиционное этническое женское имя;
+- распространённый самостоятельный вариант женского имени.
 
 REJECT:
-мужское имя;
-фамилия;
-никнейм;
-случайный набор символов;
-бранное слово;
-название бренда;
-город;
-предмет;
-мем;
-фраза;
-явный спам.
+- явно мужское имя;
+- фамилия;
+- отчество;
+- никнейм;
+- случайный набор символов;
+- бранное слово;
+- оскорбление;
+- название бренда;
+- название города;
+- предмет;
+- животное;
+- мем;
+- фраза;
+- спам;
+- бессмысленный набор букв.
 
 REVIEW:
-ты не уверен, существует ли такое женское имя.
+используй только если действительно невозможно понять,
+является ли это реальным женским именем.
+
+Если у тебя есть сомнение между ACCEPT и REVIEW,
+но строка выглядит как нормальное личное имя,
+предпочитай ACCEPT.
 
 Верни ТОЛЬКО JSON без markdown:
 
@@ -215,12 +260,20 @@ REVIEW:
   }
 
   const decision =
-      ["accept", "reject", "review"]
-          .includes(
-              parsed.decision
-          )
+      [
+        "accept",
+        "reject",
+        "review",
+      ].includes(
+          parsed.decision
+      )
           ? parsed.decision
           : "review";
+
+  const confidence =
+      Number(
+          parsed.confidence || 0
+      );
 
   return {
     decision,
@@ -232,14 +285,15 @@ REVIEW:
         ),
 
     confidence:
-        Number(
-            parsed.confidence || 0
-        ),
+        Number.isFinite(
+            confidence
+        )
+            ? confidence
+            : 0,
 
     reason:
         String(
-            parsed.reason ||
-            ""
+            parsed.reason || ""
         ).slice(0, 250),
   };
 }
@@ -291,9 +345,9 @@ export async function POST(
         getSupabaseAdmin();
 
     /*
-     * --------------------------------------------------
-     * 1. Повторная проверка существующего имени
-     * --------------------------------------------------
+     * ==================================================
+     * 1. Проверяем, есть ли имя уже сейчас
+     * ==================================================
      */
 
     const {
@@ -306,7 +360,10 @@ export async function POST(
             .select(
                 "id,name,slug"
             )
-            .eq("slug", slug)
+            .eq(
+                "slug",
+                slug
+            )
             .maybeSingle();
 
     if (
@@ -318,15 +375,19 @@ export async function POST(
     if (existingName) {
       return NextResponse.json({
         ok: true,
-        alreadyExists: true,
-        name: existingName,
+
+        alreadyExists:
+            true,
+
+        name:
+        existingName,
       });
     }
 
     /*
-     * --------------------------------------------------
-     * 2. Rate limit добавления имён
-     * --------------------------------------------------
+     * ==================================================
+     * 2. Rate limit
+     * ==================================================
      */
 
     const headerStore =
@@ -369,7 +430,9 @@ export async function POST(
                 today
             );
 
-    if (attemptsError) {
+    if (
+        attemptsError
+    ) {
       throw attemptsError;
     }
 
@@ -389,9 +452,9 @@ export async function POST(
     }
 
     /*
-     * --------------------------------------------------
-     * 3. Проверяем, не модерировали ли это имя раньше
-     * --------------------------------------------------
+     * ==================================================
+     * 3. Проверяем прошлую модерацию
+     * ==================================================
      */
 
     const {
@@ -405,7 +468,7 @@ export async function POST(
                 "name_suggestions"
             )
             .select(
-                "id,status,canonical_name,reason"
+                "id,status,canonical_name,reason,confidence"
             )
             .eq(
                 "normalized_name",
@@ -419,22 +482,29 @@ export async function POST(
       throw previousSuggestionError;
     }
 
+    /*
+     * Если раньше уже отклонили —
+     * не тратим повторно запрос к ИИ.
+     */
     if (
         previousSuggestion
             ?.status ===
         "rejected"
     ) {
-      return NextResponse.json(
-          {
-            ok: true,
-            decision:
-                "rejected",
-            message:
-                "НЕ УДАЛОСЬ ПОДТВЕРДИТЬ ИМЯ",
-          }
-      );
+      return NextResponse.json({
+        ok: true,
+
+        decision:
+            "rejected",
+
+        message:
+            "НЕ УДАЛОСЬ ПОДТВЕРДИТЬ ИМЯ",
+      });
     }
 
+    /*
+     * Если имя уже висит на ручной проверке.
+     */
     if (
         previousSuggestion
             ?.status ===
@@ -442,14 +512,16 @@ export async function POST(
     ) {
       return NextResponse.json({
         ok: true,
-        decision: "review",
+
+        decision:
+            "review",
       });
     }
 
     /*
-     * --------------------------------------------------
-     * 4. Проверка через ИИ
-     * --------------------------------------------------
+     * ==================================================
+     * 4. AI moderation
+     * ==================================================
      */
 
     const aiResult =
@@ -458,20 +530,20 @@ export async function POST(
         );
 
     /*
-     * --------------------------------------------------
-     * 5. Очень высокая уверенность → добавляем автоматически
-     *
-     * Низкая уверенность даже при accept → manual review.
-     * --------------------------------------------------
+     * ==================================================
+     * 5. ACCEPT
+     * ==================================================
      */
 
-    const autoApprove =
+    const shouldAutoApprove =
         aiResult.decision ===
         "accept" &&
         aiResult.confidence >=
-        0.86;
+        AUTO_APPROVE_CONFIDENCE;
 
-    if (autoApprove) {
+    if (
+        shouldAutoApprove
+    ) {
       const canonicalName =
           normalizeName(
               aiResult
@@ -479,6 +551,10 @@ export async function POST(
               name
           );
 
+      /*
+       * На всякий случай ещё раз
+       * валидируем то, что вернул AI.
+       */
       if (
           !isValidFemaleName(
               canonicalName
@@ -493,10 +569,10 @@ export async function POST(
             );
 
         /*
-         * На случай, если AI привёл имя
-         * к уже существующему каноническому варианту.
+         * AI мог привести редкий вариант
+         * к каноническому имени,
+         * которое уже есть в базе.
          */
-
         const {
           data:
               canonicalExisting,
@@ -525,17 +601,18 @@ export async function POST(
         ) {
           return NextResponse.json({
             ok: true,
+
             alreadyExists:
                 true,
+
             name:
             canonicalExisting,
           });
         }
 
         /*
-         * Сначала создаём/обновляем запись модерации.
+         * Записываем результат AI-модерации.
          */
-
         const {
           error:
               moderationError,
@@ -586,9 +663,8 @@ export async function POST(
         }
 
         /*
-         * Добавляем имя.
+         * Добавляем имя в основной рейтинг.
          */
-
         const {
           data:
               insertedName,
@@ -610,11 +686,10 @@ export async function POST(
                 .single();
 
         /*
-         * Если два человека одновременно
-         * добавили одно имя — просто возвращаем
-         * уже созданную запись.
+         * Race condition:
+         * два пользователя одновременно
+         * добавили одно имя.
          */
-
         if (
             insertError?.code ===
             "23505"
@@ -622,6 +697,8 @@ export async function POST(
           const {
             data:
                 raceExisting,
+            error:
+                raceError,
           } =
               await supabase
                   .from("names")
@@ -634,16 +711,26 @@ export async function POST(
                   )
                   .single();
 
+          if (
+              raceError
+          ) {
+            throw raceError;
+          }
+
           return NextResponse.json({
             ok: true,
+
             alreadyExists:
                 true,
+
             name:
             raceExisting,
           });
         }
 
-        if (insertError) {
+        if (
+            insertError
+        ) {
           throw insertError;
         }
 
@@ -655,14 +742,17 @@ export async function POST(
 
           name:
           insertedName,
+
+          confidence:
+          aiResult.confidence,
         });
       }
     }
 
     /*
-     * --------------------------------------------------
+     * ==================================================
      * 6. REJECT
-     * --------------------------------------------------
+     * ==================================================
      */
 
     if (
@@ -712,7 +802,9 @@ export async function POST(
                   }
               );
 
-      if (rejectedError) {
+      if (
+          rejectedError
+      ) {
         throw rejectedError;
       }
 
@@ -728,9 +820,10 @@ export async function POST(
     }
 
     /*
-     * --------------------------------------------------
-     * 7. Всё сомнительное → ручная проверка
-     * --------------------------------------------------
+     * ==================================================
+     * 7. ACCEPT, но уверенность ниже 0.70
+     *    или настоящий REVIEW
+     * ==================================================
      */
 
     const {
@@ -776,13 +869,20 @@ export async function POST(
                 }
             );
 
-    if (reviewError) {
+    if (
+        reviewError
+    ) {
       throw reviewError;
     }
 
     return NextResponse.json({
       ok: true,
-      decision: "review",
+
+      decision:
+          "review",
+
+      confidence:
+      aiResult.confidence,
     });
   } catch (error) {
     console.error(
