@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import VoteButton from "@/components/VoteButton";
 
 const TOP_LIMIT = 20;
+const CONTEXT_BEFORE = 2;
+const CONTEXT_AFTER = 2;
 
 function normalize(value) {
     return value
@@ -70,6 +72,38 @@ export default function RankingExperience({
         return names.slice(0, TOP_LIMIT);
     }, [names]);
 
+    const selectedIndex = useMemo(() => {
+        if (!selectedId) {
+            return -1;
+        }
+
+        return names.findIndex(
+            (item) => item.id === selectedId
+        );
+    }, [names, selectedId]);
+
+    const localContext = useMemo(() => {
+        if (selectedIndex < TOP_LIMIT) {
+            return [];
+        }
+
+        if (selectedIndex === -1) {
+            return [];
+        }
+
+        const start = Math.max(
+            0,
+            selectedIndex - CONTEXT_BEFORE
+        );
+
+        const end = Math.min(
+            names.length,
+            selectedIndex + CONTEXT_AFTER + 1
+        );
+
+        return names.slice(start, end);
+    }, [names, selectedIndex]);
+
     function clearSearchResult() {
         setSelectedId(null);
         setStatus("");
@@ -93,7 +127,9 @@ export default function RankingExperience({
         if (!match) {
             match = names.find(
                 (item) =>
-                    normalize(item.name).startsWith(normalized)
+                    normalize(item.name).startsWith(
+                        normalized
+                    )
             );
         }
 
@@ -125,11 +161,11 @@ export default function RankingExperience({
         setNotFoundName("");
         setAddState("idle");
 
-        if (rank <= TOP_LIMIT) {
-            setStatus(
-                `${match.name.toUpperCase()} · #${rank}`
-            );
+        setStatus(
+            `${match.name.toUpperCase()} · #${rank}`
+        );
 
+        if (rank <= TOP_LIMIT) {
             window.setTimeout(() => {
                 const row =
                     document.getElementById(
@@ -141,13 +177,7 @@ export default function RankingExperience({
                     block: "center",
                 });
             }, 50);
-
-            return;
         }
-
-        setStatus(
-            `${match.name.toUpperCase()} · #${rank} · ВНЕ ТОП-20`
-        );
     }
 
     function submit(event) {
@@ -247,6 +277,7 @@ export default function RankingExperience({
                 "review"
             ) {
                 setAddState("review");
+
                 setNotFoundName("");
 
                 setStatus(
@@ -336,6 +367,45 @@ export default function RankingExperience({
                     </div>
                 )}
             </div>
+
+            {selectedIndex >= TOP_LIMIT &&
+                localContext.length > 0 && (
+                    <div className="local-ranking">
+                        <div className="local-ranking-head">
+              <span>
+                ТВОЁ МЕСТО
+              </span>
+
+                            <span>
+                / #{selectedIndex + 1} /
+              </span>
+                        </div>
+
+                        <div className="local-ranking-list">
+                            {localContext.map(
+                                (item) => {
+                                    const rank =
+                                        names.findIndex(
+                                            (name) =>
+                                                name.id === item.id
+                                        ) + 1;
+
+                                    return (
+                                        <RankingRow
+                                            key={item.id}
+                                            item={item}
+                                            rank={rank}
+                                            highlighted={
+                                                item.id ===
+                                                selectedId
+                                            }
+                                        />
+                                    );
+                                }
+                            )}
+                        </div>
+                    </div>
+                )}
 
             <div className="leaderboard">
                 <div className="leaderboard-head">
