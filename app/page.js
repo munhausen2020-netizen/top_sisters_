@@ -1,5 +1,4 @@
-import Leaderboard from "@/components/Leaderboard";
-import SearchBox from "@/components/SearchBox";
+import RankingExperience from "@/components/RankingExperience";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
@@ -23,14 +22,6 @@ async function getNames() {
 export default async function HomePage() {
     const names = await getNames();
 
-    const searchNames = names.map(
-        ({ id, name, slug }) => ({
-            id,
-            name,
-            slug,
-        })
-    );
-
     return (
         <main className="page">
             <section className="hero">
@@ -49,25 +40,7 @@ export default async function HomePage() {
                 </p>
             </section>
 
-            <section className="main-layout">
-                <div className="rating-column">
-                    <Leaderboard names={names} />
-                </div>
-
-                <aside className="search-column">
-                    <div className="side-label">
-                        НАЙТИ СВОЁ ИМЯ
-                    </div>
-
-                    <SearchBox names={searchNames} />
-
-                    <div className="search-hint">
-                        ВВЕДИ ИМЯ
-                        <br />
-                        И МЫ НАЙДЁМ ЕГО В РЕЙТИНГЕ
-                    </div>
-                </aside>
-            </section>
+            <RankingExperience names={names} />
 
             <footer>
                 <span>© 2026</span>
