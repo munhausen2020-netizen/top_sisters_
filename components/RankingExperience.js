@@ -223,7 +223,7 @@ export default function RankingExperience({
                     />
 
                     <button type="submit">
-                        FIND
+                        НАЙТИ
                     </button>
                 </form>
 
