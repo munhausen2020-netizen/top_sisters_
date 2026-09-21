@@ -37,14 +37,6 @@ export default async function HomePage() {
                     <br />
                     №1 В РОССИИ?
                 </h1>
-
-                <p className="hero-description">
-                    Голосуй за своё имя и поднимай его в рейтинге.
-                </p>
-
-                <p className="rule">
-                    1 ЧЕЛОВЕК = 1 ГОЛОС В ДЕНЬ
-                </p>
             </section>
 
             <RankingExperience names={names} />
