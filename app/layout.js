@@ -10,7 +10,7 @@ const pressStart2P = Press_Start_2P({
 });
 
 export const metadata = {
-    title: "Женские имена России",
+    title: "women name...",
     description: "Голосуй за любимую.",
 };
 
