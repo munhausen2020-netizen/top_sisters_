@@ -28,7 +28,7 @@ export default async function HomePage() {
             <section className="hero">
                 <div className="hero-mascot">
                     <Image
-                        src="/pixel-princess.png"
+                        src="/pixel-princess.webp"
                         alt="Pixel princess"
                         width={160}
                         height={160}
