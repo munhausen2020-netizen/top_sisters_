@@ -1,3 +1,4 @@
+import Image from "next/image";
 import RankingExperience from "@/components/RankingExperience";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
@@ -26,9 +27,13 @@ export default async function HomePage() {
         <main className="page">
             <section className="hero">
                 <div className="hero-mascot">
-                    <img
+                    <Image
                         src="/pixel-princess.png"
                         alt="Pixel princess"
+                        width={160}
+                        height={160}
+                        priority
+                        sizes="(max-width: 600px) 128px, 160px"
                     />
                 </div>
 
