@@ -10,9 +10,8 @@ const pressStart2P = Press_Start_2P({
 });
 
 export const metadata = {
-    title: "WOMEN NAME",
-    description:
-        "Рейтинг женских имён в России.",
+    title: "Женские имена России",
+    description: "Голосуй за любимую.",
 };
 
 export default function RootLayout({
