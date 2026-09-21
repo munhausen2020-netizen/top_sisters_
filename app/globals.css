@@ -1,29 +1,25 @@
 :root {
     --bg: #000000;
 
-    --accent: #ff4fd8;
-    --accent-dim: rgba(255, 79, 216, 0.72);
-    --accent-soft: rgba(255, 79, 216, 0.18);
-    --accent-faint: rgba(255, 79, 216, 0.08);
-
-    --text: #ff4fd8;
-    --text-muted: rgba(255, 79, 216, 0.55);
+    --green: #ff4fd8;
+    --green-dim: rgba(255, 79, 216, 0.72);
+    --green-soft: rgba(255, 79, 216, 0.16);
 
     --danger: #ff3b5c;
 }
 
 
-/* ============================================================
+/* =========================================================
    BASE
-   ============================================================ */
+   ========================================================= */
 
 * {
     box-sizing: border-box;
 }
 
 html {
-    scroll-behavior: smooth;
     background: var(--bg);
+    scroll-behavior: smooth;
 }
 
 body {
@@ -40,20 +36,21 @@ body {
             ),
             var(--bg);
 
-    color: var(--text);
+    color: var(--green);
 
-    font-family:
-            var(--font-pixel),
-            monospace;
-
-    -webkit-font-smoothing: none;
-    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-pixel), monospace;
 
     overflow-x: hidden;
 }
 
+button,
+input {
+    font: inherit;
+}
+
 body::after {
     content: "";
+
     position: fixed;
     inset: 0;
 
@@ -67,42 +64,33 @@ body::after {
 
     background-size: 100% 4px;
 
-    z-index: 9999;
-
     opacity: 0.35;
+
+    z-index: 9999;
 }
 
 
-/* ============================================================
+/* =========================================================
    PAGE
-   ============================================================ */
+   ========================================================= */
 
 .page {
     width: 100%;
     min-height: 100vh;
 
-    padding:
-            28px
-            20px
-            72px;
+    padding: 28px 20px 72px;
 }
 
 
-/* ============================================================
+/* =========================================================
    HERO
-   ============================================================ */
+   ========================================================= */
 
 .hero {
     width: 100%;
     max-width: 900px;
 
-    margin:
-            0 auto
-            54px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    margin: 0 auto 54px;
 
     text-align: center;
 }
@@ -111,11 +99,11 @@ body::after {
     width: 160px;
     height: 160px;
 
+    margin: 0 auto 18px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-
-    margin-bottom: 18px;
 }
 
 .hero-mascot img {
@@ -130,7 +118,7 @@ body::after {
 .hero-title {
     margin: 0;
 
-    color: var(--accent);
+    color: var(--green);
 
     font-size: clamp(
             28px,
@@ -140,15 +128,13 @@ body::after {
 
     line-height: 1.55;
 
-    letter-spacing: 0.02em;
-
-    text-transform: uppercase;
+    text-align: center;
 }
 
 
-/* ============================================================
-   RANKING WRAPPER
-   ============================================================ */
+/* =========================================================
+   RANKING
+   ========================================================= */
 
 .ranking-shell {
     width: 100%;
@@ -157,22 +143,16 @@ body::after {
     margin: 0 auto;
 }
 
-
-/* ============================================================
-   LEADERBOARD
-   ============================================================ */
-
 .leaderboard {
     width: 100%;
+
+    padding: 0 16px 16px;
 
     border: 0;
 
     background: transparent;
 
-    padding:
-            0
-            16px
-            16px;
+    box-shadow: none;
 }
 
 .leaderboard-head {
@@ -182,19 +162,13 @@ body::after {
 
     gap: 16px;
 
-    padding:
-            0
-            0
-            18px;
-
+    padding-bottom: 18px;
     margin-bottom: 4px;
 
     border-bottom:
-            2px
-            solid
-            var(--accent-soft);
+            2px solid var(--green-soft);
 
-    color: var(--accent);
+    color: var(--green);
 
     font-size: 9px;
 
@@ -207,9 +181,9 @@ body::after {
 }
 
 
-/* ============================================================
-   RANKING ROW
-   ============================================================ */
+/* =========================================================
+   ROW
+   ========================================================= */
 
 .leader-row {
     display: grid;
@@ -228,17 +202,15 @@ body::after {
     min-height: 50px;
 
     border-bottom:
-            1px
-            dashed
-            var(--accent-soft);
+            1px dashed var(--green-soft);
 
-    color: var(--accent);
+    color: var(--green);
 }
 
 .leader-rank {
-    font-size: 10px;
+    color: var(--green-dim);
 
-    color: var(--accent-dim);
+    font-size: 10px;
 
     white-space: nowrap;
 }
@@ -246,13 +218,15 @@ body::after {
 .leader-name {
     min-width: 0;
 
+    color: var(--green);
+
     font-size: 11px;
 
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 
-    color: var(--accent);
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
 }
 
 .leader-dots {
@@ -261,15 +235,13 @@ body::after {
     height: 1px;
 
     border-bottom:
-            3px
-            dotted
-            var(--accent-soft);
+            3px dotted var(--green-soft);
 }
 
 .leader-score {
-    font-size: 10px;
+    color: var(--green);
 
-    color: var(--accent);
+    font-size: 10px;
 
     text-align: right;
 
@@ -277,9 +249,9 @@ body::after {
 }
 
 
-/* ============================================================
+/* =========================================================
    VOTE BUTTON
-   ============================================================ */
+   ========================================================= */
 
 .vote-button {
     width: 108px;
@@ -292,34 +264,25 @@ body::after {
     justify-content: center;
 
     border:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
 
     border-radius: 0;
 
     background: transparent;
 
-    color: var(--accent);
+    color: var(--green);
 
-    font-family:
-            var(--font-pixel),
-            monospace;
+    font-family: var(--font-pixel), monospace;
 
     font-size: 8px;
 
-    cursor: pointer;
-
     text-transform: uppercase;
 
-    transition:
-            background 0.12s ease,
-            color 0.12s ease,
-            transform 0.12s ease;
+    cursor: pointer;
 }
 
 .vote-button:hover {
-    background: var(--accent);
+    background: var(--green);
 
     color: #000000;
 }
@@ -335,9 +298,9 @@ body::after {
 }
 
 
-/* ============================================================
+/* =========================================================
    SEARCH
-   ============================================================ */
+   ========================================================= */
 
 .search-section {
     width: 100%;
@@ -346,18 +309,15 @@ body::after {
 }
 
 .search-title {
-    margin:
-            0
-            0
-            28px;
+    margin: 0 0 28px;
 
-    text-align: center;
-
-    color: var(--accent);
+    color: var(--green);
 
     font-size: 13px;
 
     line-height: 1.6;
+
+    text-align: center;
 
     text-transform: uppercase;
 }
@@ -372,59 +332,55 @@ body::after {
     160px;
 
     border:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
 
     background: #000000;
 }
 
 .search-input-wrap {
+    min-width: 0;
+
     display: flex;
     align-items: center;
 
-    min-width: 0;
-
-    padding:
-            0
-            24px;
-
     gap: 20px;
+
+    padding: 0 24px;
 }
 
 .search-prompt {
     flex-shrink: 0;
 
-    color: var(--accent);
+    color: var(--green);
 
     font-size: 18px;
 }
 
 .search-input {
     width: 100%;
-
     min-width: 0;
 
+    padding: 0;
+
     border: 0;
+
     outline: none;
 
     background: transparent;
 
-    color: var(--accent);
+    color: var(--green);
 
-    font-family:
-            var(--font-pixel),
-            monospace;
+    caret-color: var(--green);
+
+    font-family: var(--font-pixel), monospace;
 
     font-size: 14px;
 
     text-transform: uppercase;
-
-    caret-color: var(--accent);
 }
 
 .search-input::placeholder {
-    color: var(--accent-dim);
+    color: var(--green-dim);
 
     opacity: 1;
 }
@@ -433,30 +389,23 @@ body::after {
     min-height: 72px;
 
     border: 0;
+
     border-left:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
 
     border-radius: 0;
 
-    background: var(--accent);
+    background: var(--green);
 
     color: #000000;
 
-    font-family:
-            var(--font-pixel),
-            monospace;
+    font-family: var(--font-pixel), monospace;
 
     font-size: 10px;
 
-    cursor: pointer;
-
     text-transform: uppercase;
 
-    transition:
-            opacity 0.12s ease,
-            transform 0.12s ease;
+    cursor: pointer;
 }
 
 .search-submit:hover {
@@ -474,46 +423,33 @@ body::after {
 }
 
 
-/* ============================================================
+/* =========================================================
    LOCAL RANKING
-   ============================================================ */
+   ========================================================= */
 
 .local-ranking {
     width: 100%;
 
     margin-top: 36px;
 
+    padding: 20px 18px;
+
     border:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
 
-    background:
-            rgba(
-                    255,
-                    79,
-                    216,
-                    0.025
-            );
-
-    padding:
-            20px
-            18px;
+    background: rgba(255, 79, 216, 0.025);
 }
 
 .local-ranking-title {
-    margin:
-            0
-            0
-            18px;
+    margin: 0 0 18px;
 
-    text-align: center;
-
-    color: var(--accent);
+    color: var(--green);
 
     font-size: 10px;
 
     line-height: 1.7;
+
+    text-align: center;
 
     text-transform: uppercase;
 }
@@ -523,7 +459,7 @@ body::after {
 
     margin-top: 10px;
 
-    color: var(--accent);
+    color: var(--green);
 
     font-size: 18px;
 }
@@ -535,7 +471,7 @@ body::after {
 .local-ranking .leader-row.is-selected {
     position: relative;
 
-    background: var(--accent-soft);
+    background: var(--green-soft);
 }
 
 .local-ranking .leader-row.is-selected::before {
@@ -549,46 +485,33 @@ body::after {
 
     width: 4px;
 
-    background: var(--accent);
+    background: var(--green);
 }
 
 
-/* ============================================================
+/* =========================================================
    ADD NAME
-   ============================================================ */
+   ========================================================= */
 
 .add-name-card {
     width: 100%;
 
     margin-top: 36px;
 
-    padding:
-            28px
-            20px;
+    padding: 28px 20px;
 
     border:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
+
+    background: rgba(255, 79, 216, 0.025);
 
     text-align: center;
-
-    background:
-            rgba(
-                    255,
-                    79,
-                    216,
-                    0.025
-            );
 }
 
 .add-name-title {
-    margin:
-            0
-            0
-            18px;
+    margin: 0 0 18px;
 
-    color: var(--accent);
+    color: var(--green);
 
     font-size: 11px;
 
@@ -596,12 +519,9 @@ body::after {
 }
 
 .add-name-question {
-    margin:
-            0
-            0
-            24px;
+    margin: 0 0 24px;
 
-    color: var(--accent);
+    color: var(--green);
 
     font-size: 10px;
 
@@ -612,30 +532,24 @@ body::after {
     min-width: 190px;
     min-height: 48px;
 
-    padding:
-            0
-            20px;
+    padding: 0 20px;
 
     border:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
 
     border-radius: 0;
 
-    background: var(--accent);
+    background: var(--green);
 
     color: #000000;
 
-    font-family:
-            var(--font-pixel),
-            monospace;
+    font-family: var(--font-pixel), monospace;
 
     font-size: 9px;
 
-    cursor: pointer;
-
     text-transform: uppercase;
+
+    cursor: pointer;
 }
 
 .add-name-button:hover {
@@ -649,9 +563,9 @@ body::after {
 }
 
 
-/* ============================================================
-   MODAL
-   ============================================================ */
+/* =========================================================
+   VOTE MODAL
+   ========================================================= */
 
 .vote-modal-backdrop {
     position: fixed;
@@ -666,81 +580,54 @@ body::after {
 
     padding: 20px;
 
-    background:
-            rgba(
-                    0,
-                    0,
-                    0,
-                    0.88
-            );
+    background: rgba(0, 0, 0, 0.88);
 }
 
 .vote-modal {
     width: 100%;
     max-width: 520px;
 
-    padding:
-            28px
-            26px;
+    padding: 28px 26px;
 
     border:
-            3px
-            solid
-            var(--accent);
+            3px solid var(--green);
 
     background: #000000;
 
-    box-shadow:
-            0
-            0
-            32px
-            rgba(
-                    255,
-                    79,
-                    216,
-                    0.18
-            );
+    color: var(--green);
 
-    color: var(--accent);
+    box-shadow:
+            0 0 32px rgba(255, 79, 216, 0.18);
 }
 
 .vote-modal-heading {
-    margin:
-            0
-            0
-            24px;
+    margin: 0 0 24px;
+
+    color: var(--green);
 
     font-size: 11px;
 
     line-height: 1.6;
-
-    color: var(--accent);
 }
 
 .vote-modal-question {
-    margin:
-            0
-            0
-            20px;
+    margin: 0 0 20px;
+
+    color: var(--green);
 
     font-size: 14px;
 
     line-height: 1.8;
-
-    color: var(--accent);
 }
 
 .vote-modal-rule {
-    margin:
-            0
-            0
-            30px;
+    margin: 0 0 30px;
+
+    color: var(--green-dim);
 
     font-size: 10px;
 
     line-height: 1.8;
-
-    color: var(--accent-dim);
 }
 
 .vote-modal-actions {
@@ -756,24 +643,18 @@ body::after {
 .vote-modal-button {
     min-height: 50px;
 
-    padding:
-            0
-            14px;
+    padding: 0 14px;
 
     border:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
 
     border-radius: 0;
 
     background: transparent;
 
-    color: var(--accent);
+    color: var(--green);
 
-    font-family:
-            var(--font-pixel),
-            monospace;
+    font-family: var(--font-pixel), monospace;
 
     font-size: 9px;
 
@@ -781,13 +662,13 @@ body::after {
 }
 
 .vote-modal-button:hover {
-    background: var(--accent);
+    background: var(--green);
 
     color: #000000;
 }
 
 .vote-modal-button.confirm {
-    background: var(--accent);
+    background: var(--green);
 
     color: #000000;
 }
@@ -796,10 +677,16 @@ body::after {
     opacity: 0.88;
 }
 
+.vote-modal-button:disabled {
+    opacity: 0.55;
 
-/* ============================================================
+    cursor: default;
+}
+
+
+/* =========================================================
    TOAST
-   ============================================================ */
+   ========================================================= */
 
 .vote-toast {
     position: fixed;
@@ -817,29 +704,17 @@ body::after {
                     calc(100vw - 32px)
             );
 
-    padding:
-            20px
-            22px;
+    padding: 20px 22px;
 
     border:
-            2px
-            solid
-            var(--accent);
+            2px solid var(--green);
 
     background: #000000;
 
-    box-shadow:
-            0
-            0
-            28px
-            rgba(
-                    255,
-                    79,
-                    216,
-                    0.16
-            );
+    color: var(--green);
 
-    color: var(--accent);
+    box-shadow:
+            0 0 28px rgba(255, 79, 216, 0.16);
 
     font-size: 10px;
 
@@ -857,9 +732,9 @@ body::after {
 }
 
 
-/* ============================================================
+/* =========================================================
    LOADER
-   ============================================================ */
+   ========================================================= */
 
 .inline-loader {
     width: 14px;
@@ -870,14 +745,7 @@ body::after {
     flex-shrink: 0;
 
     border:
-            2px
-            solid
-            rgba(
-                    0,
-                    0,
-                    0,
-                    0.28
-            );
+            2px solid rgba(0, 0, 0, 0.28);
 
     border-top-color: #000000;
 
@@ -892,9 +760,9 @@ body::after {
 
 .vote-button .inline-loader,
 .vote-modal-button:not(.confirm) .inline-loader {
-    border-color: var(--accent-soft);
+    border-color: var(--green-soft);
 
-    border-top-color: var(--accent);
+    border-top-color: var(--green);
 }
 
 @keyframes spin {
@@ -904,11 +772,12 @@ body::after {
 }
 
 
-/* ============================================================
+/* =========================================================
    MOBILE
-   ============================================================ */
+   ========================================================= */
 
 @media (max-width: 700px) {
+
     .page {
         padding:
                 20px
@@ -1003,9 +872,7 @@ body::after {
     }
 
     .search-input-wrap {
-        padding:
-                0
-                14px;
+        padding: 0 14px;
 
         gap: 12px;
     }
@@ -1016,9 +883,9 @@ body::after {
 
     .search-input {
         /*
-          Важно:
-          16px предотвращает автоматический
-          zoom Safari на iPhone.
+          Не уменьшаем ниже 16px:
+          Safari иначе увеличивает страницу
+          при фокусе на input.
         */
         font-size: 16px;
     }
@@ -1030,15 +897,9 @@ body::after {
     }
 
     .local-ranking {
-        padding:
-                18px
-                8px;
-
         margin-top: 28px;
-    }
 
-    .local-ranking .leader-row.is-selected::before {
-        left: -8px;
+        padding: 18px 8px;
     }
 
     .local-ranking-title {
@@ -1049,12 +910,14 @@ body::after {
         font-size: 15px;
     }
 
+    .local-ranking .leader-row.is-selected::before {
+        left: -8px;
+    }
+
     .add-name-card {
         margin-top: 28px;
 
-        padding:
-                24px
-                14px;
+        padding: 24px 14px;
     }
 
     .add-name-title {
@@ -1072,9 +935,7 @@ body::after {
     }
 
     .vote-modal {
-        padding:
-                24px
-                18px;
+        padding: 24px 18px;
     }
 
     .vote-modal-heading {
@@ -1092,9 +953,7 @@ body::after {
     .vote-modal-button {
         min-height: 52px;
 
-        padding:
-                0
-                8px;
+        padding: 0 8px;
 
         font-size: 8px;
     }
@@ -1102,20 +961,19 @@ body::after {
     .vote-toast {
         bottom: 20px;
 
-        padding:
-                18px
-                14px;
+        padding: 18px 14px;
 
         font-size: 9px;
     }
 }
 
 
-/* ============================================================
+/* =========================================================
    VERY SMALL MOBILE
-   ============================================================ */
+   ========================================================= */
 
 @media (max-width: 380px) {
+
     .page {
         padding-left: 8px;
         padding-right: 8px;
@@ -1152,9 +1010,7 @@ body::after {
     }
 
     .search-input-wrap {
-        padding:
-                0
-                10px;
+        padding: 0 10px;
     }
 
     .search-submit {
