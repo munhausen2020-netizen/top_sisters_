@@ -10,7 +10,7 @@ const pressStart2P = Press_Start_2P({
 });
 
 export const metadata = {
-    title: "women name...",
+    title: "Женские имена России",
     description: "Голосуй за любимую.",
 };
 
@@ -21,6 +21,10 @@ export default function RootLayout({
         <html lang="ru">
         <body className={pressStart2P.variable}>
         {children}
+
+        {/* =====================================================
+            YANDEX METRIKA
+        ===================================================== */}
 
         <Script
             id="yandex-metrika"
@@ -58,6 +62,78 @@ export default function RootLayout({
             <div>
                 <img
                     src="https://mc.yandex.ru/watch/112874757"
+                    style={{
+                        position: "absolute",
+                        left: "-9999px",
+                    }}
+                    alt=""
+                />
+            </div>
+        </noscript>
+
+
+        {/* =====================================================
+            VK ADS / TOP.MAIL.RU PIXEL
+        ===================================================== */}
+
+        <Script
+            id="vk-ads-pixel"
+            strategy="afterInteractive"
+        >
+            {`
+            var _tmr = window._tmr || (window._tmr = []);
+
+            _tmr.push({
+              id: "3796075",
+              type: "pageView",
+              start: (new Date()).getTime()
+            });
+
+            (function (d, w, id) {
+              if (d.getElementById(id)) return;
+
+              var ts = d.createElement("script");
+
+              ts.type = "text/javascript";
+              ts.async = true;
+              ts.id = id;
+              ts.src =
+                "https://top-fwz1.mail.ru/js/code.js";
+
+              var f = function () {
+                var s =
+                  d.getElementsByTagName("script")[0];
+
+                s.parentNode.insertBefore(
+                  ts,
+                  s
+                );
+              };
+
+              if (
+                w.opera ==
+                "[object Opera]"
+              ) {
+                d.addEventListener(
+                  "DOMContentLoaded",
+                  f,
+                  false
+                );
+              } else {
+                f();
+              }
+            })(
+              document,
+              window,
+              "tmr-code"
+            );
+          `}
+        </Script>
+
+        <noscript>
+            <div>
+                <img
+                    src="https://top-fwz1.mail.ru/counter?id=3796075;js=na"
                     style={{
                         position: "absolute",
                         left: "-9999px",
