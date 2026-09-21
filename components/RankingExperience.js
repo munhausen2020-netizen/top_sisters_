@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import VoteButton from "@/components/VoteButton";
 import { reachGoal } from "@/lib/metrika";
 
-const TOP_LIMIT = 20;
+const TOP_LIMIT = 10;
 const CONTEXT_BEFORE = 2;
 const CONTEXT_AFTER = 2;
 
