@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+
 import { useRouter } from "next/navigation";
 import VoteButton from "@/components/VoteButton";
 
@@ -62,6 +68,9 @@ export default function RankingExperience({
                                           }) {
     const router = useRouter();
 
+    const localRankingRef = useRef(null);
+    const scrollTimerRef = useRef(null);
+
     const [query, setQuery] = useState("");
     const [selectedId, setSelectedId] = useState(null);
     const [status, setStatus] = useState("");
@@ -104,11 +113,61 @@ export default function RankingExperience({
         return names.slice(start, end);
     }, [names, selectedIndex]);
 
+    /*
+     * Когда найдено имя вне TOP-20,
+     * React сначала создаёт блок "ТВОЁ МЕСТО".
+     *
+     * Только после этого прокручиваем страницу к нему.
+     * Небольшая задержка особенно важна для iPhone:
+     * Safari должен успеть закрыть клавиатуру и пересчитать viewport.
+     */
+    useEffect(() => {
+        if (
+            selectedIndex < TOP_LIMIT ||
+            selectedIndex === -1 ||
+            localContext.length === 0
+        ) {
+            return;
+        }
+
+        if (scrollTimerRef.current) {
+            clearTimeout(scrollTimerRef.current);
+        }
+
+        scrollTimerRef.current = setTimeout(() => {
+            localRankingRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }, 350);
+
+        return () => {
+            if (scrollTimerRef.current) {
+                clearTimeout(scrollTimerRef.current);
+            }
+        };
+    }, [
+        selectedIndex,
+        localContext.length,
+    ]);
+
     function clearSearchResult() {
         setSelectedId(null);
         setStatus("");
         setNotFoundName("");
         setAddState("idle");
+    }
+
+    function closeKeyboard() {
+        const activeElement =
+            document.activeElement;
+
+        if (
+            activeElement &&
+            typeof activeElement.blur === "function"
+        ) {
+            activeElement.blur();
+        }
     }
 
     function findName() {
@@ -142,7 +201,10 @@ export default function RankingExperience({
                     .toUpperCase()}» НЕ НАЙДЕНО`
             );
 
-            setNotFoundName(query.trim());
+            setNotFoundName(
+                query.trim()
+            );
+
             setAddState("idle");
 
             return;
@@ -150,7 +212,8 @@ export default function RankingExperience({
 
         const rank =
             names.findIndex(
-                (item) => item.id === match.id
+                (item) =>
+                    item.id === match.id
             ) + 1;
 
         setSelectedId(match.id);
@@ -161,6 +224,10 @@ export default function RankingExperience({
             `${match.name.toUpperCase()} · #${rank}`
         );
 
+        /*
+         * Если имя уже в TOP-20,
+         * скроллим непосредственно к строке.
+         */
         if (rank <= TOP_LIMIT) {
             window.setTimeout(() => {
                 const row =
@@ -172,12 +239,28 @@ export default function RankingExperience({
                     behavior: "smooth",
                     block: "center",
                 });
-            }, 50);
+            }, 300);
         }
+
+        /*
+         * Для имени вне TOP-20 здесь ничего
+         * дополнительно скроллить не нужно.
+         *
+         * После render сработает useEffect
+         * и перенесёт пользователя к
+         * блоку "ТВОЁ МЕСТО".
+         */
     }
 
     function submit(event) {
         event.preventDefault();
+
+        /*
+         * Сначала закрываем клавиатуру.
+         * Особенно важно на iOS Safari.
+         */
+        closeKeyboard();
+
         findName();
     }
 
@@ -188,6 +271,8 @@ export default function RankingExperience({
         ) {
             return;
         }
+
+        closeKeyboard();
 
         setAddState("loading");
         setStatus("ПРОВЕРЯЕМ ИМЯ...");
@@ -225,6 +310,7 @@ export default function RankingExperience({
 
             if (data.alreadyExists) {
                 setAddState("done");
+
                 setQuery(data.name.name);
                 setSelectedId(data.name.id);
                 setNotFoundName("");
@@ -243,8 +329,15 @@ export default function RankingExperience({
                 "approved"
             ) {
                 setAddState("done");
-                setQuery(data.name.name);
-                setSelectedId(data.name.id);
+
+                setQuery(
+                    data.name.name
+                );
+
+                setSelectedId(
+                    data.name.id
+                );
+
                 setNotFoundName("");
 
                 setStatus(
@@ -261,6 +354,7 @@ export default function RankingExperience({
                 "review"
             ) {
                 setAddState("review");
+
                 setNotFoundName("");
 
                 setStatus(
@@ -389,7 +483,10 @@ export default function RankingExperience({
 
             {selectedIndex >= TOP_LIMIT &&
                 localContext.length > 0 && (
-                    <div className="local-ranking">
+                    <div
+                        className="local-ranking"
+                        ref={localRankingRef}
+                    >
                         <div className="local-ranking-head">
               <span>
                 ТВОЁ МЕСТО

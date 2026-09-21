@@ -613,6 +613,12 @@ img {
             4px
             0
             rgba(23, 255, 95, 0.07);
+
+    /*
+      При автоматическом scrollIntoView
+      оставляем небольшой воздух сверху.
+    */
+    scroll-margin-top: 18px;
 }
 
 .local-ranking-head {
@@ -1008,7 +1014,7 @@ max-width: 700px
     }
 
     /* -------------------------
-       SEARCH BELOW RATING
+       SEARCH
     ------------------------- */
 
     .search-section-title {
@@ -1038,6 +1044,9 @@ max-width: 700px
         font-size: 14px;
     }
 
+    /*
+      16px предотвращает auto-zoom Safari.
+    */
     .search-form input {
         padding:
                 0
@@ -1062,6 +1071,14 @@ max-width: 700px
                 8px;
 
         font-size: 8px;
+    }
+
+    /*
+      После поиска имя оказывается
+      почти сразу под верхней частью viewport.
+    */
+    .local-ranking {
+        scroll-margin-top: 12px;
     }
 
     .highlighted-row {
