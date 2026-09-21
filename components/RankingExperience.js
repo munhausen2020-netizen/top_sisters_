@@ -142,10 +142,7 @@ export default function RankingExperience({
                     .toUpperCase()}» НЕ НАЙДЕНО`
             );
 
-            setNotFoundName(
-                query.trim()
-            );
-
+            setNotFoundName(query.trim());
             setAddState("idle");
 
             return;
@@ -153,8 +150,7 @@ export default function RankingExperience({
 
         const rank =
             names.findIndex(
-                (item) =>
-                    item.id === match.id
+                (item) => item.id === match.id
             ) + 1;
 
         setSelectedId(match.id);
@@ -229,13 +225,8 @@ export default function RankingExperience({
 
             if (data.alreadyExists) {
                 setAddState("done");
-
                 setQuery(data.name.name);
-
-                setSelectedId(
-                    data.name.id
-                );
-
+                setSelectedId(data.name.id);
                 setNotFoundName("");
 
                 setStatus(
@@ -252,15 +243,8 @@ export default function RankingExperience({
                 "approved"
             ) {
                 setAddState("done");
-
-                setQuery(
-                    data.name.name
-                );
-
-                setSelectedId(
-                    data.name.id
-                );
-
+                setQuery(data.name.name);
+                setSelectedId(data.name.id);
                 setNotFoundName("");
 
                 setStatus(
@@ -277,7 +261,6 @@ export default function RankingExperience({
                 "review"
             ) {
                 setAddState("review");
-
                 setNotFoundName("");
 
                 setStatus(
@@ -304,6 +287,42 @@ export default function RankingExperience({
 
     return (
         <section className="ranking-shell">
+            <div className="leaderboard">
+                <div className="leaderboard-head">
+          <span>
+            РЕЙТИНГ
+          </span>
+
+                    <span>
+            / ТОП-20 /
+          </span>
+                </div>
+
+                <div className="leaderboard-list">
+                    {topNames.map(
+                        (item, index) => (
+                            <div
+                                id={`rank-${item.id}`}
+                                key={item.id}
+                            >
+                                <RankingRow
+                                    item={item}
+                                    rank={index + 1}
+                                    highlighted={
+                                        item.id ===
+                                        selectedId
+                                    }
+                                />
+                            </div>
+                        )
+                    )}
+                </div>
+            </div>
+
+            <div className="search-section-title">
+                ГДЕ ТВОЁ ИМЯ?
+            </div>
+
             <div className="search-stack">
                 <form
                     className="search-form"
@@ -406,38 +425,6 @@ export default function RankingExperience({
                         </div>
                     </div>
                 )}
-
-            <div className="leaderboard">
-                <div className="leaderboard-head">
-          <span>
-            РЕЙТИНГ
-          </span>
-
-                    <span>
-            / ТОП-20 /
-          </span>
-                </div>
-
-                <div className="leaderboard-list">
-                    {topNames.map(
-                        (item, index) => (
-                            <div
-                                id={`rank-${item.id}`}
-                                key={item.id}
-                            >
-                                <RankingRow
-                                    item={item}
-                                    rank={index + 1}
-                                    highlighted={
-                                        item.id ===
-                                        selectedId
-                                    }
-                                />
-                            </div>
-                        )
-                    )}
-                </div>
-            </div>
         </section>
     );
 }
