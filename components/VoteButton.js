@@ -7,10 +7,12 @@ import {
 } from "react";
 
 import { useRouter } from "next/navigation";
+import { reachGoal } from "@/lib/metrika";
 
 export default function VoteButton({
                                        nameId,
                                        name,
+                                       rank = null,
                                        compact = false,
                                    }) {
     const router = useRouter();
@@ -26,14 +28,17 @@ export default function VoteButton({
     const [toast, setToast] =
         useState(null);
 
-    const toastTimer = useRef(null);
+    const toastTimer =
+        useRef(null);
 
     function showToast(
         message,
         type = "success"
     ) {
         if (toastTimer.current) {
-            clearTimeout(toastTimer.current);
+            clearTimeout(
+                toastTimer.current
+            );
         }
 
         setToast({
@@ -41,18 +46,18 @@ export default function VoteButton({
             type,
         });
 
-        toastTimer.current = setTimeout(
-            () => {
+        toastTimer.current =
+            setTimeout(() => {
                 setToast(null);
-            },
-            3000
-        );
+            }, 3000);
     }
 
     useEffect(() => {
         return () => {
             if (toastTimer.current) {
-                clearTimeout(toastTimer.current);
+                clearTimeout(
+                    toastTimer.current
+                );
             }
         };
     }, []);
@@ -61,6 +66,14 @@ export default function VoteButton({
         if (isLoading) {
             return;
         }
+
+        reachGoal(
+            "vote_open",
+            {
+                name,
+                rank,
+            }
+        );
 
         setIsConfirmOpen(true);
     }
@@ -81,26 +94,41 @@ export default function VoteButton({
         setIsLoading(true);
 
         try {
-            const response = await fetch(
-                "/api/vote",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                    },
-                    body: JSON.stringify({
-                        nameId,
-                    }),
-                }
-            );
+            const response =
+                await fetch(
+                    "/api/vote",
+                    {
+                        method: "POST",
 
-            const data = await response.json();
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                        },
+
+                        body:
+                            JSON.stringify({
+                                nameId,
+                            }),
+                    }
+                );
+
+            const data =
+                await response.json();
 
             setIsConfirmOpen(false);
 
             if (!response.ok) {
-                if (data.alreadyVoted) {
+                if (
+                    data.alreadyVoted
+                ) {
+                    reachGoal(
+                        "vote_already_used",
+                        {
+                            name,
+                            rank,
+                        }
+                    );
+
                     showToast(
                         "ТЫ УЖЕ ГОЛОСОВАЛ СЕГОДНЯ",
                         "blocked"
@@ -115,6 +143,14 @@ export default function VoteButton({
 
                 return;
             }
+
+            reachGoal(
+                "vote_confirmed",
+                {
+                    name,
+                    rank,
+                }
+            );
 
             showToast(
                 `ГОЛОС ЗА «${name.toUpperCase()}» ПРИНЯТ`,
@@ -158,19 +194,24 @@ export default function VoteButton({
             {isConfirmOpen && (
                 <div
                     className="vote-modal-overlay"
-                    onClick={closeConfirm}
+                    onClick={
+                        closeConfirm
+                    }
                 >
                     <div
                         className="vote-modal"
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby={`vote-title-${nameId}`}
-                        onClick={(event) => {
+                        onClick={(
+                            event
+                        ) => {
                             event.stopPropagation();
                         }}
                     >
                         <div className="vote-modal-label">
-                            &gt; ПОДТВЕРЖДЕНИЕ
+                            &gt;
+                            ПОДТВЕРЖДЕНИЕ
                         </div>
 
                         <div
@@ -179,19 +220,26 @@ export default function VoteButton({
                         >
                             ГОЛОСУЕМ ЗА
                             <br />
-                            «{name.toUpperCase()}»?
+                            «
+                            {name.toUpperCase()}
+                            »?
                         </div>
 
                         <div className="vote-modal-note">
-                            ОДИН ГОЛОС В ДЕНЬ
+                            ОДИН ГОЛОС В
+                            ДЕНЬ
                         </div>
 
                         <div className="vote-modal-actions">
                             <button
                                 className="vote-modal-cancel"
                                 type="button"
-                                onClick={closeConfirm}
-                                disabled={isLoading}
+                                onClick={
+                                    closeConfirm
+                                }
+                                disabled={
+                                    isLoading
+                                }
                             >
                                 НЕТ
                             </button>
@@ -199,13 +247,20 @@ export default function VoteButton({
                             <button
                                 className="vote-modal-confirm"
                                 type="button"
-                                onClick={vote}
-                                disabled={isLoading}
+                                onClick={
+                                    vote
+                                }
+                                disabled={
+                                    isLoading
+                                }
                             >
                                 {isLoading ? (
                                     <span className="loading-content">
                     <span className="inline-loader dark" />
-                    <span>ОТПРАВКА...</span>
+
+                    <span>
+                      ОТПРАВКА...
+                    </span>
                   </span>
                                 ) : (
                                     "ДА, ГОЛОСУЮ"
@@ -226,7 +281,9 @@ export default function VoteButton({
             &gt;
           </span>
 
-                    <span>{toast.message}</span>
+                    <span>
+            {toast.message}
+          </span>
                 </div>
             )}
         </>
