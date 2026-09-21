@@ -516,7 +516,7 @@ export default function RankingExperience({
           </span>
 
                     <span>
-            / ТОП-20 /
+            / ТОП-10 /
           </span>
                 </div>
 
