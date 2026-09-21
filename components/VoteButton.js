@@ -18,23 +18,22 @@ export default function VoteButton({
     const [isLoading, setIsLoading] =
         useState(false);
 
-    const [isConfirmOpen, setIsConfirmOpen] =
-        useState(false);
+    const [
+        isConfirmOpen,
+        setIsConfirmOpen,
+    ] = useState(false);
 
     const [toast, setToast] =
         useState(null);
 
-    const toastTimer =
-        useRef(null);
+    const toastTimer = useRef(null);
 
     function showToast(
         message,
         type = "success"
     ) {
         if (toastTimer.current) {
-            clearTimeout(
-                toastTimer.current
-            );
+            clearTimeout(toastTimer.current);
         }
 
         setToast({
@@ -42,18 +41,18 @@ export default function VoteButton({
             type,
         });
 
-        toastTimer.current =
-            setTimeout(() => {
+        toastTimer.current = setTimeout(
+            () => {
                 setToast(null);
-            }, 3000);
+            },
+            3000
+        );
     }
 
     useEffect(() => {
         return () => {
             if (toastTimer.current) {
-                clearTimeout(
-                    toastTimer.current
-                );
+                clearTimeout(toastTimer.current);
             }
         };
     }, []);
@@ -82,25 +81,21 @@ export default function VoteButton({
         setIsLoading(true);
 
         try {
-            const response =
-                await fetch(
-                    "/api/vote",
-                    {
-                        method: "POST",
+            const response = await fetch(
+                "/api/vote",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+                    body: JSON.stringify({
+                        nameId,
+                    }),
+                }
+            );
 
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                        },
-
-                        body: JSON.stringify({
-                            nameId,
-                        }),
-                    }
-                );
-
-            const data =
-                await response.json();
+            const data = await response.json();
 
             setIsConfirmOpen(false);
 
@@ -207,9 +202,14 @@ export default function VoteButton({
                                 onClick={vote}
                                 disabled={isLoading}
                             >
-                                {isLoading
-                                    ? "..."
-                                    : "ДА, ГОЛОСУЮ"}
+                                {isLoading ? (
+                                    <span className="loading-content">
+                    <span className="inline-loader dark" />
+                    <span>ОТПРАВКА...</span>
+                  </span>
+                                ) : (
+                                    "ДА, ГОЛОСУЮ"
+                                )}
                             </button>
                         </div>
                     </div>
@@ -226,9 +226,7 @@ export default function VoteButton({
             &gt;
           </span>
 
-                    <span>
-            {toast.message}
-          </span>
+                    <span>{toast.message}</span>
                 </div>
             )}
         </>
