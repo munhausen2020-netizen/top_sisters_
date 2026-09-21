@@ -1,10 +1,11 @@
 :root {
     --bg: #000000;
-    --green: #17ff5f;
-    --green-soft: #8cffae;
-    --green-dim: rgba(23, 255, 95, 0.28);
-    --green-faint: rgba(23, 255, 95, 0.08);
-    --danger: #ff4f6d;
+
+    --green: #ff4fd8;
+    --green-dim: rgba(255, 79, 216, 0.75);
+    --green-soft: rgba(255, 79, 216, 0.18);
+
+    --danger: #ff3b3b;
 }
 
 * {
