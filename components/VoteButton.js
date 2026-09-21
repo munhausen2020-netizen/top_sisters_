@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { useRouter } from "next/navigation";
 
 export default function VoteButton({
@@ -10,14 +15,23 @@ export default function VoteButton({
                                    }) {
   const router = useRouter();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [isLoading, setIsLoading] =
+      useState(false);
 
-  const toastTimer = useRef(null);
+  const [toast, setToast] =
+      useState(null);
 
-  function showToast(message, type = "success") {
+  const toastTimer =
+      useRef(null);
+
+  function showToast(
+      message,
+      type = "success"
+  ) {
     if (toastTimer.current) {
-      clearTimeout(toastTimer.current);
+      clearTimeout(
+          toastTimer.current
+      );
     }
 
     setToast({
@@ -25,15 +39,18 @@ export default function VoteButton({
       type,
     });
 
-    toastTimer.current = setTimeout(() => {
-      setToast(null);
-    }, 2500);
+    toastTimer.current =
+        setTimeout(() => {
+          setToast(null);
+        }, 2500);
   }
 
   useEffect(() => {
     return () => {
       if (toastTimer.current) {
-        clearTimeout(toastTimer.current);
+        clearTimeout(
+            toastTimer.current
+        );
       }
     };
   }, []);
@@ -46,17 +63,25 @@ export default function VoteButton({
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/vote", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nameId,
-        }),
-      });
+      const response =
+          await fetch(
+              "/api/vote",
+              {
+                method: "POST",
 
-      const data = await response.json();
+                headers: {
+                  "Content-Type":
+                      "application/json",
+                },
+
+                body: JSON.stringify({
+                  nameId,
+                }),
+              }
+          );
+
+      const data =
+          await response.json();
 
       if (!response.ok) {
         if (data.alreadyVoted) {
@@ -66,7 +91,8 @@ export default function VoteButton({
           );
         } else {
           showToast(
-              data.error || "НЕ УДАЛОСЬ ОТПРАВИТЬ ГОЛОС",
+              data.error ||
+              "НЕ УДАЛОСЬ ОТПРАВИТЬ ГОЛОС",
               "error"
           );
         }
@@ -105,7 +131,9 @@ export default function VoteButton({
               aria-busy={isLoading}
               aria-label={`Голосовать за ${name}`}
           >
-            {compact ? "+1" : "ГОЛОСОВАТЬ"}
+            {compact
+                ? "ГОЛОСУЙ"
+                : "ГОЛОСОВАТЬ"}
           </button>
         </div>
 

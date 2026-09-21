@@ -69,6 +69,7 @@ export default function RankingExperience({
     const router = useRouter();
 
     const localRankingRef = useRef(null);
+    const addNameRef = useRef(null);
     const scrollTimerRef = useRef(null);
 
     const [query, setQuery] = useState("");
@@ -92,11 +93,10 @@ export default function RankingExperience({
     }, [names, selectedId]);
 
     const localContext = useMemo(() => {
-        if (selectedIndex < TOP_LIMIT) {
-            return [];
-        }
-
-        if (selectedIndex === -1) {
+        if (
+            selectedIndex < TOP_LIMIT ||
+            selectedIndex === -1
+        ) {
             return [];
         }
 
@@ -114,12 +114,9 @@ export default function RankingExperience({
     }, [names, selectedIndex]);
 
     /*
-     * Когда найдено имя вне TOP-20,
-     * React сначала создаёт блок "ТВОЁ МЕСТО".
-     *
-     * Только после этого прокручиваем страницу к нему.
-     * Небольшая задержка особенно важна для iPhone:
-     * Safari должен успеть закрыть клавиатуру и пересчитать viewport.
+     * Найдено имя вне TOP-20:
+     * после появления блока "ТВОЁ МЕСТО"
+     * прокручиваем пользователя прямо к нему.
      */
     useEffect(() => {
         if (
@@ -131,25 +128,63 @@ export default function RankingExperience({
         }
 
         if (scrollTimerRef.current) {
-            clearTimeout(scrollTimerRef.current);
+            clearTimeout(
+                scrollTimerRef.current
+            );
         }
 
-        scrollTimerRef.current = setTimeout(() => {
-            localRankingRef.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        }, 350);
+        scrollTimerRef.current =
+            setTimeout(() => {
+                localRankingRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }, 350);
 
         return () => {
             if (scrollTimerRef.current) {
-                clearTimeout(scrollTimerRef.current);
+                clearTimeout(
+                    scrollTimerRef.current
+                );
             }
         };
     }, [
         selectedIndex,
         localContext.length,
     ]);
+
+    /*
+     * Имени нет:
+     * после появления блока добавления
+     * автоматически прокручиваем к нему.
+     */
+    useEffect(() => {
+        if (!notFoundName) {
+            return;
+        }
+
+        if (scrollTimerRef.current) {
+            clearTimeout(
+                scrollTimerRef.current
+            );
+        }
+
+        scrollTimerRef.current =
+            setTimeout(() => {
+                addNameRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+            }, 350);
+
+        return () => {
+            if (scrollTimerRef.current) {
+                clearTimeout(
+                    scrollTimerRef.current
+                );
+            }
+        };
+    }, [notFoundName]);
 
     function clearSearchResult() {
         setSelectedId(null);
@@ -180,7 +215,8 @@ export default function RankingExperience({
 
         let match = names.find(
             (item) =>
-                normalize(item.name) === normalized
+                normalize(item.name) ===
+                normalized
         );
 
         if (!match) {
@@ -224,10 +260,6 @@ export default function RankingExperience({
             `${match.name.toUpperCase()} · #${rank}`
         );
 
-        /*
-         * Если имя уже в TOP-20,
-         * скроллим непосредственно к строке.
-         */
         if (rank <= TOP_LIMIT) {
             window.setTimeout(() => {
                 const row =
@@ -241,26 +273,12 @@ export default function RankingExperience({
                 });
             }, 300);
         }
-
-        /*
-         * Для имени вне TOP-20 здесь ничего
-         * дополнительно скроллить не нужно.
-         *
-         * После render сработает useEffect
-         * и перенесёт пользователя к
-         * блоку "ТВОЁ МЕСТО".
-         */
     }
 
     function submit(event) {
         event.preventDefault();
 
-        /*
-         * Сначала закрываем клавиатуру.
-         * Особенно важно на iOS Safari.
-         */
         closeKeyboard();
-
         findName();
     }
 
@@ -310,7 +328,6 @@ export default function RankingExperience({
 
             if (data.alreadyExists) {
                 setAddState("done");
-
                 setQuery(data.name.name);
                 setSelectedId(data.name.id);
                 setNotFoundName("");
@@ -459,9 +476,20 @@ export default function RankingExperience({
                 )}
 
                 {notFoundName && (
-                    <div className="add-name-box">
-                        <div className="add-name-question">
-                            ДОБАВИТЬ ИМЯ В РЕЙТИНГ?
+                    <div
+                        className="add-name-box"
+                        ref={addNameRef}
+                    >
+                        <div className="add-name-copy">
+                            <div className="add-name-title">
+                                ТАКОГО ИМЕНИ ПОКА НЕТ
+                            </div>
+
+                            <div className="add-name-question">
+                                ДОБАВИТЬ «
+                                {notFoundName.toUpperCase()}
+                                » В РЕЙТИНГ?
+                            </div>
                         </div>
 
                         <button
@@ -475,7 +503,7 @@ export default function RankingExperience({
                             {addState ===
                             "loading"
                                 ? "ПРОВЕРЯЕМ..."
-                                : "+ ДОБАВИТЬ"}
+                                : "ДОБАВИТЬ"}
                         </button>
                     </div>
                 )}
