@@ -29,21 +29,29 @@ export default function PaymentReturnVerifier() {
         let cancelled = false;
 
 
-        async function run() {
-            const params =
-                new URLSearchParams(
-                    window.location.search
-                );
+        async function sleep(ms) {
+            return new Promise(
+                (resolve) =>
+                    setTimeout(
+                        resolve,
+                        ms
+                    )
+            );
+        }
 
 
-            if (
-                params.get("payment") !==
-                "success"
-            ) {
-                return;
-            }
+        async function verifyPayment() {
+            /*
+              Главное изменение:
 
+              больше НЕ проверяем
+              ?payment=success.
 
+              Если paymentId есть в
+              localStorage — проверяем
+              платёж при любом заходе
+              на сайт.
+            */
             const paymentId =
                 window.localStorage
                     .getItem(
@@ -51,23 +59,16 @@ export default function PaymentReturnVerifier() {
                     );
 
 
+            /*
+              Pending платежа нет —
+              ничего делать не нужно.
+            */
             if (!paymentId) {
-                /*
-                  Например, пользователь
-                  вернулся в другом браузере.
-
-                  Ничего не начисляем без
-                  проверки paymentId.
-                */
-                setIsError(true);
-
-                setMessage(
-                    "НЕ УДАЛОСЬ НАЙТИ ПЛАТЁЖ"
-                );
-
                 return;
             }
 
+
+            setIsError(false);
 
             setMessage(
                 "ПРОВЕРЯЕМ ОПЛАТУ..."
@@ -75,12 +76,17 @@ export default function PaymentReturnVerifier() {
 
 
             /*
-              На случай небольшой задержки
-              статуса после возврата.
+              Делаем несколько быстрых
+              попыток.
+
+              Это полезно, если человек
+              вернулся на сайт буквально
+              сразу после оплаты, а YooKassa
+              ещё секунду-две обновляет статус.
             */
             for (
                 let attempt = 1;
-                attempt <= 5;
+                attempt <= 6;
                 attempt += 1
             ) {
                 if (cancelled) {
@@ -105,6 +111,9 @@ export default function PaymentReturnVerifier() {
                                     JSON.stringify({
                                         paymentId,
                                     }),
+
+                                cache:
+                                    "no-store",
                             }
                         );
 
@@ -114,25 +123,78 @@ export default function PaymentReturnVerifier() {
 
 
                     /*
-                      Платёж ещё обрабатывается.
+                      Платёж ещё pending.
+
+                      Ждём немного и
+                      проверяем снова.
                     */
                     if (
                         response.status ===
                         202
                     ) {
-                        await new Promise(
-                            (resolve) =>
-                                setTimeout(
-                                    resolve,
-                                    2000
-                                )
-                        );
+                        if (
+                            attempt < 6
+                        ) {
+                            await sleep(
+                                1000
+                            );
 
-                        continue;
+                            continue;
+                        }
+
+
+                        if (
+                            !cancelled
+                        ) {
+                            setIsError(
+                                false
+                            );
+
+                            setMessage(
+                                "ПЛАТЁЖ ОБРАБАТЫВАЕТСЯ..."
+                            );
+                        }
+
+
+                        return;
                     }
 
 
-                    if (!response.ok) {
+                    /*
+                      Например платёж отменён.
+                    */
+                    if (
+                        response.status ===
+                        400 &&
+                        data?.status ===
+                        "canceled"
+                    ) {
+                        window.localStorage
+                            .removeItem(
+                                PAYMENT_STORAGE_KEY
+                            );
+
+
+                        if (
+                            !cancelled
+                        ) {
+                            setIsError(
+                                true
+                            );
+
+                            setMessage(
+                                "ПЛАТЁЖ ОТМЕНЁН"
+                            );
+                        }
+
+
+                        return;
+                    }
+
+
+                    if (
+                        !response.ok
+                    ) {
                         throw new Error(
                             data?.error ||
                             "Ошибка проверки платежа"
@@ -140,6 +202,13 @@ export default function PaymentReturnVerifier() {
                     }
 
 
+                    /*
+                      Успех.
+
+                      Убираем paymentId,
+                      потому что этот платёж
+                      больше проверять не надо.
+                    */
                     window.localStorage
                         .removeItem(
                             PAYMENT_STORAGE_KEY
@@ -155,15 +224,17 @@ export default function PaymentReturnVerifier() {
 
 
                     if (
-                        data.credited
+                        data.credited ===
+                        true
                     ) {
                         setMessage(
                             `+${data.votes} ГОЛОСОВ ЗАЧИСЛЕНО`
                         );
                     } else {
                         /*
-                          Например webhook всё-таки
-                          успел обработать платёж.
+                          Если webhook или cron
+                          уже успел обработать
+                          этот payment_id.
                         */
                         setMessage(
                             "ГОЛОСЫ УЖЕ ЗАЧИСЛЕНЫ"
@@ -172,8 +243,8 @@ export default function PaymentReturnVerifier() {
 
 
                     /*
-                      Убираем payment=success
-                      из URL.
+                      Убираем параметры оплаты
+                      из URL, если они остались.
                     */
                     const cleanUrl =
                         window.location.pathname;
@@ -188,17 +259,29 @@ export default function PaymentReturnVerifier() {
 
 
                     /*
-                      Перезапрашиваем Server
-                      Components и новый рейтинг.
+                      Обновляем Server Components,
+                      чтобы сразу подтянулся
+                      новый рейтинг из Supabase.
                     */
                     router.refresh();
 
 
-                    setTimeout(() => {
-                        if (!cancelled) {
-                            setMessage("");
-                        }
-                    }, 4000);
+                    /*
+                      Через несколько секунд
+                      убираем уведомление.
+                    */
+                    setTimeout(
+                        () => {
+                            if (
+                                !cancelled
+                            ) {
+                                setMessage(
+                                    ""
+                                );
+                            }
+                        },
+                        4000
+                    );
 
 
                     return;
@@ -211,38 +294,49 @@ export default function PaymentReturnVerifier() {
 
 
                     /*
-                      Последняя попытка.
+                      Если это была не последняя
+                      попытка — пробуем ещё раз.
                     */
                     if (
-                        attempt === 5
+                        attempt < 6
                     ) {
-                        if (
-                            !cancelled
-                        ) {
-                            setIsError(true);
+                        await sleep(
+                            1000
+                        );
 
-                            setMessage(
-                                "НЕ УДАЛОСЬ ПРОВЕРИТЬ ОПЛАТУ"
-                            );
-                        }
-
-                        return;
+                        continue;
                     }
 
 
-                    await new Promise(
-                        (resolve) =>
-                            setTimeout(
-                                resolve,
-                                2000
-                            )
-                    );
+                    /*
+                      ВАЖНО:
+
+                      paymentId НЕ удаляем.
+
+                      Значит при следующем заходе
+                      пользователя на сайт мы снова
+                      попробуем проверить платёж.
+                    */
+                    if (
+                        !cancelled
+                    ) {
+                        setIsError(
+                            true
+                        );
+
+                        setMessage(
+                            "НЕ УДАЛОСЬ ПРОВЕРИТЬ ОПЛАТУ"
+                        );
+                    }
+
+
+                    return;
                 }
             }
         }
 
 
-        run();
+        verifyPayment();
 
 
         return () => {
