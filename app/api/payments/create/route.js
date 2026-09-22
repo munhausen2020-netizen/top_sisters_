@@ -94,7 +94,8 @@ export async function POST(request) {
 
 
         /*
-          Проверяем имя
+          Проверяем, что имя существует
+          и активно.
         */
         const {
             data: name,
@@ -125,6 +126,7 @@ export async function POST(request) {
                 nameError
             );
 
+
             return NextResponse.json(
                 {
                     error:
@@ -137,14 +139,16 @@ export async function POST(request) {
         }
 
 
+        /*
+          Адрес paid-версии,
+          куда вернётся пользователь.
+        */
         const siteUrl =
-            process.env
-                .NEXT_PUBLIC_SITE_URL ||
             "https://proactive-expression-production-a967.up.railway.app";
 
 
         /*
-          Создаём платёж в ЮKassa
+          Создаём платёж.
         */
         const response =
             await fetch(
@@ -173,19 +177,29 @@ export async function POST(request) {
                                     "RUB",
                             },
 
-                            capture: true,
+                            capture:
+                                true,
 
                             confirmation: {
                                 type:
                                     "redirect",
 
                                 return_url:
-                                    `${siteUrl}/?payment=success`,
+                                    `${siteUrl}/`,
                             },
 
                             description:
                                 `${votes} голосов за ${name.name}`,
 
+                            /*
+                              Это самое важное.
+
+                              Supabase webhook потом
+                              получит metadata и поймёт:
+
+                              кому начислить
+                              и сколько голосов.
+                            */
                             metadata: {
                                 name_id:
                                 name.id,
@@ -211,6 +225,7 @@ export async function POST(request) {
                 payment
             );
 
+
             return NextResponse.json(
                 {
                     error:
@@ -227,82 +242,20 @@ export async function POST(request) {
 
         if (
             !payment?.id ||
-            !payment?.confirmation?.confirmation_url
+            !payment
+                ?.confirmation
+                ?.confirmation_url
         ) {
             console.error(
                 "Invalid YooKassa payment:",
                 payment
             );
 
+
             return NextResponse.json(
                 {
                     error:
-                        "Некорректный ответ ЮKassa",
-                },
-                {
-                    status: 500,
-                }
-            );
-        }
-
-
-        /*
-          ВАЖНО:
-
-          Платёж ещё НЕ оплачен.
-
-          Но мы уже сохраняем его,
-          чтобы потом сервер сам
-          мог проверить статус.
-        */
-        const {
-            error: orderError,
-        } =
-            await supabase
-                .from(
-                    "payment_orders"
-                )
-                .insert({
-                    payment_id:
-                    payment.id,
-
-                    name_id:
-                    name.id,
-
-                    amount_rub:
-                    amount,
-
-                    votes_count:
-                    votes,
-
-                    status:
-                        payment.status ||
-                        "pending",
-
-                    credited:
-                        false,
-                });
-
-
-        if (orderError) {
-            console.error(
-                "Could not save payment order:",
-                orderError
-            );
-
-
-            /*
-              Здесь лучше НЕ отправлять
-              человека на оплату.
-
-              Иначе деньги могут быть
-              оплачены, а payment_id
-              мы потеряем.
-            */
-            return NextResponse.json(
-                {
-                    error:
-                        "Не удалось сохранить платёж",
+                        "Некорректный ответ YooKassa",
                 },
                 {
                     status: 500,
@@ -332,7 +285,8 @@ export async function POST(request) {
             payment.id,
 
             confirmationUrl:
-            payment.confirmation
+            payment
+                .confirmation
                 .confirmation_url,
         });
 

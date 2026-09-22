@@ -6,8 +6,6 @@ import {
     Press_Start_2P,
 } from "next/font/google";
 
-import PaymentReturnVerifier
-    from "@/components/PaymentReturnVerifier";
 
 
 const pressStart2P =
@@ -48,7 +46,7 @@ export default function RootLayout({
         >
         {children}
 
-        <PaymentReturnVerifier />
+
 
 
         {/* =========================

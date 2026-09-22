@@ -2,37 +2,20 @@
 
 import { useState } from "react";
 
-const PAYMENT_STORAGE_KEY =
-    "womenname_pending_payment_id";
-
-
 export default function PaidVoteButton({
                                            nameId,
                                            name,
                                            compact = false,
                                        }) {
-    const [isOpen, setIsOpen] =
-        useState(false);
-
-    const [amount, setAmount] =
-        useState(100);
-
-    const [
-        customAmount,
-        setCustomAmount,
-    ] = useState("");
-
-    const [loading, setLoading] =
-        useState(false);
-
-    const [error, setError] =
-        useState("");
+    const [isOpen, setIsOpen] = useState(false);
+    const [amount, setAmount] = useState(100);
+    const [customAmount, setCustomAmount] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
 
     function closeModal() {
-        if (loading) {
-            return;
-        }
+        if (loading) return;
 
         setIsOpen(false);
         setError("");
@@ -42,9 +25,7 @@ export default function PaidVoteButton({
 
 
     async function startPayment() {
-        if (loading) {
-            return;
-        }
+        if (loading) return;
 
 
         const finalAmount =
@@ -54,9 +35,7 @@ export default function PaidVoteButton({
 
 
         if (
-            !Number.isInteger(
-                finalAmount
-            ) ||
+            !Number.isInteger(finalAmount) ||
             finalAmount < 1 ||
             finalAmount > 5000
         ) {
@@ -107,17 +86,7 @@ export default function PaidVoteButton({
 
 
             if (
-                !data?.paymentId
-            ) {
-                throw new Error(
-                    "НЕ ПОЛУЧЕН ID ПЛАТЕЖА"
-                );
-            }
-
-
-            if (
-                !data
-                    ?.confirmationUrl
+                !data?.confirmationUrl
             ) {
                 throw new Error(
                     "НЕ ПОЛУЧЕНА ССЫЛКА НА ОПЛАТУ"
@@ -126,15 +95,13 @@ export default function PaidVoteButton({
 
 
             /*
-              Сохраняем paymentId ДО ухода
-              пользователя на ЮKassa.
+              Больше ничего не сохраняем
+              в localStorage.
+
+              После успешной оплаты
+              webhook Supabase сам
+              начислит голоса.
             */
-            window.localStorage.setItem(
-                PAYMENT_STORAGE_KEY,
-                data.paymentId
-            );
-
-
             window.location.href =
                 data.confirmationUrl;
 
@@ -188,9 +155,7 @@ export default function PaidVoteButton({
                 <div
                     className="vote-modal-overlay"
 
-                    onMouseDown={(
-                        event
-                    ) => {
+                    onMouseDown={(event) => {
                         if (
                             event.target ===
                             event.currentTarget
@@ -219,12 +184,9 @@ export default function PaidVoteButton({
                         <div
                             style={{
                                 display: "grid",
-
                                 gridTemplateColumns:
                                     "repeat(3, 1fr)",
-
                                 gap: "8px",
-
                                 marginTop: "22px",
                             }}
                         >
@@ -232,33 +194,18 @@ export default function PaidVoteButton({
                                 (value) => (
                                     <button
                                         key={value}
-
                                         type="button"
-
-                                        className=
-                                            "terminal-button"
-
-                                        disabled={
-                                            loading
-                                        }
+                                        className="terminal-button"
+                                        disabled={loading}
 
                                         onClick={() => {
-                                            setAmount(
-                                                value
-                                            );
-
-                                            setCustomAmount(
-                                                ""
-                                            );
-
-                                            setError(
-                                                ""
-                                            );
+                                            setAmount(value);
+                                            setCustomAmount("");
+                                            setError("");
                                         }}
 
                                         style={{
-                                            minHeight:
-                                                "58px",
+                                            minHeight: "58px",
 
                                             background:
                                                 !customAmount &&
@@ -282,37 +229,21 @@ export default function PaidVoteButton({
 
                         <div
                             style={{
-                                marginTop:
-                                    "10px",
+                                marginTop: "10px",
                             }}
                         >
                             <input
                                 type="number"
-
                                 min="1"
-
                                 max="5000"
+                                inputMode="numeric"
+                                value={customAmount}
+                                disabled={loading}
+                                placeholder="ДРУГАЯ СУММА"
 
-                                inputMode=
-                                    "numeric"
-
-                                value={
-                                    customAmount
-                                }
-
-                                disabled={
-                                    loading
-                                }
-
-                                placeholder=
-                                    "ДРУГАЯ СУММА"
-
-                                onChange={(
-                                    event
-                                ) => {
+                                onChange={(event) => {
                                     setCustomAmount(
-                                        event.target
-                                            .value
+                                        event.target.value
                                     );
 
                                     setError("");
@@ -320,32 +251,17 @@ export default function PaidVoteButton({
 
                                 style={{
                                     width: "100%",
-
-                                    minHeight:
-                                        "54px",
-
+                                    minHeight: "54px",
                                     border:
                                         "2px solid var(--green)",
-
                                     outline: "none",
-
-                                    padding:
-                                        "0 12px",
-
-                                    background:
-                                        "#000",
-
-                                    color:
-                                        "var(--green)",
-
+                                    padding: "0 12px",
+                                    background: "#000",
+                                    color: "var(--green)",
                                     fontFamily:
                                         "var(--font-pixel), monospace",
-
-                                    fontSize:
-                                        "16px",
-
-                                    textAlign:
-                                        "center",
+                                    fontSize: "16px",
+                                    textAlign: "center",
                                 }}
                             />
                         </div>
@@ -354,20 +270,11 @@ export default function PaidVoteButton({
                         {error && (
                             <div
                                 style={{
-                                    marginTop:
-                                        "14px",
-
-                                    color:
-                                        "var(--danger)",
-
-                                    fontSize:
-                                        "8px",
-
-                                    lineHeight:
-                                        "1.7",
-
-                                    textAlign:
-                                        "center",
+                                    marginTop: "14px",
+                                    color: "var(--danger)",
+                                    fontSize: "8px",
+                                    lineHeight: "1.7",
+                                    textAlign: "center",
                                 }}
                             >
                                 {error}
@@ -379,17 +286,9 @@ export default function PaidVoteButton({
 
                             <button
                                 type="button"
-
-                                className=
-                                    "vote-modal-cancel"
-
-                                disabled={
-                                    loading
-                                }
-
-                                onClick={
-                                    closeModal
-                                }
+                                className="vote-modal-cancel"
+                                disabled={loading}
+                                onClick={closeModal}
                             >
                                 НАЗАД
                             </button>
@@ -397,25 +296,14 @@ export default function PaidVoteButton({
 
                             <button
                                 type="button"
-
-                                className=
-                                    "vote-modal-confirm"
-
-                                disabled={
-                                    loading
-                                }
-
-                                onClick={
-                                    startPayment
-                                }
+                                className="vote-modal-confirm"
+                                disabled={loading}
+                                onClick={startPayment}
                             >
                                 {loading ? (
                                     <span className="loading-content">
-
                     <span className="inline-loader dark" />
-
                     ПЕРЕХОД...
-
                   </span>
                                 ) : (
                                     <>
