@@ -37,10 +37,10 @@ export default function PaidVoteButton({
         if (
             !Number.isInteger(finalAmount) ||
             finalAmount < 1 ||
-            finalAmount > 5000
+            finalAmount > 50000
         ) {
             setError(
-                "ВВЕДИ СУММУ ОТ 1 ДО 5000 ₽"
+                "ВВЕДИ СУММУ ОТ 1 ДО 50 000 ₽"
             );
 
             return;
@@ -235,7 +235,7 @@ export default function PaidVoteButton({
                             <input
                                 type="number"
                                 min="1"
-                                max="5000"
+                                max="50000"
                                 inputMode="numeric"
                                 value={customAmount}
                                 disabled={loading}

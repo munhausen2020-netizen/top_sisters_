@@ -68,12 +68,12 @@ export async function POST(request) {
         if (
             !Number.isInteger(amount) ||
             amount < 1 ||
-            amount > 5000
+            amount > 50000
         ) {
             return NextResponse.json(
                 {
                     error:
-                        "Сумма должна быть от 1 до 5000 ₽",
+                        "Сумма должна быть от 1 до 50 000 ₽",
                 },
                 {
                     status: 400,
