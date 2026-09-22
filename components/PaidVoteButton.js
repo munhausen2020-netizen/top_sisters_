@@ -1,131 +1,105 @@
 "use client";
 
-import {
-    useState,
-} from "react";
-
+import { useState } from "react";
 
 export default function PaidVoteButton({
                                            nameId,
                                            name,
                                            compact = false,
                                        }) {
-    const [isOpen, setIsOpen] =
-        useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    const [amount, setAmount] = useState(100);
+    const [customAmount, setCustomAmount] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const [amount, setAmount] =
-        useState(100);
-
-    const [customAmount, setCustomAmount] =
-        useState("");
-
-    const [loading, setLoading] =
-        useState(false);
-
-    const [error, setError] =
-        useState("");
-
-
-    async function pay(
-        selectedAmount
-    ) {
+    function closeModal() {
         if (loading) {
             return;
         }
 
+        setIsOpen(false);
+        setError("");
+        setCustomAmount("");
+        setAmount(100);
+    }
 
-        const finalAmount =
-            Number(
-                selectedAmount
-            );
+    async function startPayment() {
+        if (loading) {
+            return;
+        }
 
+        const finalAmount = customAmount
+            ? Number(customAmount)
+            : amount;
 
         if (
             !Number.isInteger(finalAmount) ||
             finalAmount < 1 ||
             finalAmount > 5000
         ) {
-            setError(
-                "Введите сумму от 1 до 5000 ₽"
-            );
-
+            setError("ВВЕДИ СУММУ ОТ 1 ДО 5000 ₽");
             return;
         }
-
 
         setLoading(true);
         setError("");
 
-
         try {
-            const response =
-                await fetch(
-                    "/api/payments/create",
-                    {
-                        method:
-                            "POST",
+            const response = await fetch(
+                "/api/payments/create",
+                {
+                    method: "POST",
 
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                        },
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
 
-                        body:
-                            JSON.stringify({
-                                nameId,
-                                amount:
-                                finalAmount,
-                            }),
-                    }
-                );
+                    body: JSON.stringify({
+                        nameId,
+                        amount: finalAmount,
+                    }),
+                }
+            );
 
-
-            const data =
-                await response.json();
-
+            const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(
                     data?.error ||
-                    "Ошибка оплаты"
+                    "НЕ УДАЛОСЬ СОЗДАТЬ ПЛАТЁЖ"
                 );
             }
 
-
-            if (
-                !data
-                    ?.confirmationUrl
-            ) {
+            if (!data?.confirmationUrl) {
                 throw new Error(
-                    "Нет ссылки на оплату"
+                    "НЕ ПОЛУЧЕНА ССЫЛКА НА ОПЛАТУ"
                 );
             }
-
 
             window.location.href =
                 data.confirmationUrl;
-
         } catch (error) {
             console.error(
+                "Payment error:",
                 error
             );
 
-
             setError(
                 error?.message ||
-                "Не удалось создать платёж"
+                "ОШИБКА ОПЛАТЫ"
             );
 
-
-            setLoading(
-                false
-            );
+            setLoading(false);
         }
     }
 
+    const finalAmount = customAmount
+        ? Number(customAmount) || 0
+        : amount;
 
-    if (!isOpen) {
-        return (
+    return (
+        <>
             <div
                 className={
                     compact
@@ -136,129 +110,182 @@ export default function PaidVoteButton({
                 <button
                     type="button"
                     className="terminal-button"
-                    onClick={() =>
-                        setIsOpen(true)
-                    }
+                    onClick={() => {
+                        setError("");
+                        setIsOpen(true);
+                    }}
                 >
-                    {compact
-                        ? "ПОДНЯТЬ"
-                        : "ПОДНЯТЬ ИМЯ"}
+                    ПОДНЯТЬ
                 </button>
             </div>
-        );
-    }
 
+            {isOpen && (
+                <div
+                    className="vote-modal-overlay"
+                    onMouseDown={(event) => {
+                        if (
+                            event.target ===
+                            event.currentTarget
+                        ) {
+                            closeModal();
+                        }
+                    }}
+                >
+                    <div className="vote-modal">
+                        <div className="vote-modal-label">
+                            {">"} ПОДНЯТЬ ИМЯ
+                        </div>
 
-    return (
-        <div className="paid-vote-box">
+                        <div className="vote-modal-title">
+                            {name.toUpperCase()}
+                        </div>
 
-            <div className="paid-vote-title">
-                ПОДНЯТЬ {name.toUpperCase()}
-            </div>
+                        <div className="vote-modal-note">
+                            1 ₽ = 1 ГОЛОС
+                        </div>
 
-
-            <div className="paid-vote-rate">
-                1 ₽ = 1 ГОЛОС
-            </div>
-
-
-            <div className="paid-vote-presets">
-
-                {[50, 100, 300].map(
-                    (value) => (
-                        <button
-                            type="button"
-                            key={value}
-                            className={
-                                amount === value
-                                    ? "paid-vote-preset active"
-                                    : "paid-vote-preset"
-                            }
-                            onClick={() => {
-                                setAmount(
-                                    value
-                                );
-
-                                setCustomAmount(
-                                    ""
-                                );
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns:
+                                    "repeat(3, 1fr)",
+                                gap: "8px",
+                                marginTop: "22px",
                             }}
                         >
-                            +{value}
-                            <br />
-                            {value} ₽
-                        </button>
-                    )
-                )}
+                            {[50, 100, 300].map(
+                                (value) => (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        className="terminal-button"
+                                        disabled={loading}
+                                        onClick={() => {
+                                            setAmount(value);
+                                            setCustomAmount("");
+                                            setError("");
+                                        }}
+                                        style={{
+                                            minHeight: "58px",
 
-            </div>
+                                            background:
+                                                !customAmount &&
+                                                amount === value
+                                                    ? "var(--green)"
+                                                    : "#000",
 
-
-            <div className="paid-vote-custom">
-
-                <input
-                    type="number"
-                    min="1"
-                    max="5000"
-                    inputMode="numeric"
-                    placeholder="ДРУГАЯ СУММА"
-                    value={customAmount}
-                    onChange={(event) => {
-                        setCustomAmount(
-                            event.target.value
-                        );
-                    }}
-                />
-
-            </div>
-
-
-            {error ? (
-                <div className="paid-vote-error">
-                    {error}
-                </div>
-            ) : null}
-
-
-            <div className="paid-vote-actions">
-
-                <button
-                    type="button"
-                    className="paid-vote-cancel"
-                    disabled={loading}
-                    onClick={() => {
-                        setIsOpen(false);
-                        setError("");
-                    }}
-                >
-                    НАЗАД
-                </button>
-
-
-                <button
-                    type="button"
-                    className="paid-vote-confirm"
-                    disabled={loading}
-                    onClick={() =>
-                        pay(
-                            customAmount
-                                ? Number(
-                                    customAmount
+                                            color:
+                                                !customAmount &&
+                                                amount === value
+                                                    ? "#000"
+                                                    : "var(--green)",
+                                        }}
+                                    >
+                                        +{value}
+                                        <br />
+                                        {value} ₽
+                                    </button>
                                 )
-                                : amount
-                        )
-                    }
-                >
-                    {loading
-                        ? "ПЕРЕХОД..."
-                        : `ОПЛАТИТЬ ${
-                            customAmount ||
-                            amount
-                        } ₽`}
-                </button>
+                            )}
+                        </div>
 
-            </div>
+                        <div
+                            style={{
+                                marginTop: "10px",
+                            }}
+                        >
+                            <input
+                                type="number"
+                                min="1"
+                                max="5000"
+                                inputMode="numeric"
+                                value={customAmount}
+                                disabled={loading}
+                                placeholder="ДРУГАЯ СУММА"
+                                onChange={(event) => {
+                                    setCustomAmount(
+                                        event.target.value
+                                    );
 
-        </div>
+                                    setError("");
+                                }}
+                                style={{
+                                    width: "100%",
+                                    minHeight: "54px",
+
+                                    border:
+                                        "2px solid var(--green)",
+
+                                    outline: "none",
+
+                                    padding: "0 12px",
+
+                                    background: "#000",
+
+                                    color: "var(--green)",
+
+                                    fontFamily:
+                                        "var(--font-pixel), monospace",
+
+                                    fontSize: "16px",
+
+                                    textAlign: "center",
+                                }}
+                            />
+                        </div>
+
+                        {error && (
+                            <div
+                                style={{
+                                    marginTop: "14px",
+
+                                    color:
+                                        "var(--danger)",
+
+                                    fontSize: "8px",
+
+                                    lineHeight: "1.7",
+
+                                    textAlign: "center",
+                                }}
+                            >
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="vote-modal-actions">
+                            <button
+                                type="button"
+                                className="vote-modal-cancel"
+                                disabled={loading}
+                                onClick={closeModal}
+                            >
+                                НАЗАД
+                            </button>
+
+                            <button
+                                type="button"
+                                className="vote-modal-confirm"
+                                disabled={loading}
+                                onClick={startPayment}
+                            >
+                                {loading ? (
+                                    <span className="loading-content">
+                    <span className="inline-loader dark" />
+                    ПЕРЕХОД...
+                  </span>
+                                ) : (
+                                    <>
+                                        ОПЛАТИТЬ
+                                        <br />
+                                        {finalAmount} ₽
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }

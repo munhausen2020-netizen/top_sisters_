@@ -2,7 +2,6 @@
 
 import PaidVoteButton from "@/components/PaidVoteButton";
 
-
 export default function VoteButton({
                                        nameId,
                                        name,
