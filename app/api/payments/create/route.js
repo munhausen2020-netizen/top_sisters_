@@ -125,7 +125,7 @@ export async function POST(request) {
 
         const siteUrl =
             process.env.NEXT_PUBLIC_SITE_URL ||
-            "https://womenname.ru";
+            "https://proactive-expression-production-a967.up.railway.app";
 
 
         const response =
