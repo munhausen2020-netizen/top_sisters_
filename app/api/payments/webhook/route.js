@@ -30,23 +30,19 @@ function getAuthHeader() {
 }
 
 
-async function getPayment(
-    paymentId
-) {
+async function getPayment(paymentId) {
     const response =
         await fetch(
             `https://api.yookassa.ru/v3/payments/${paymentId}`,
             {
-                method:
-                    "GET",
+                method: "GET",
 
                 headers: {
                     Authorization:
                         getAuthHeader(),
                 },
 
-                cache:
-                    "no-store",
+                cache: "no-store",
             }
         );
 
@@ -71,6 +67,10 @@ export async function POST(request) {
             await request.json();
 
 
+        /*
+          Нас интересует только
+          успешный платёж.
+        */
         if (
             notification?.event !==
             "payment.succeeded"
@@ -101,8 +101,10 @@ export async function POST(request) {
 
 
         /*
-          Ещё раз проверяем платёж
-          напрямую через API ЮKassa.
+          Не доверяем webhook вслепую.
+
+          Повторно спрашиваем YooKassa
+          о реальном статусе платежа.
         */
         const payment =
             await getPayment(
@@ -166,6 +168,10 @@ export async function POST(request) {
             );
 
 
+        /*
+          У нас логика:
+          1 ₽ = 1 голос.
+        */
         if (
             !nameId ||
             !Number.isInteger(amount) ||
@@ -198,22 +204,23 @@ export async function POST(request) {
         const {
             data,
             error,
-        } = await supabase.rpc(
-            "credit_paid_votes",
-            {
-                p_payment_id:
-                payment.id,
+        } =
+            await supabase.rpc(
+                "credit_paid_votes",
+                {
+                    p_payment_id:
+                    payment.id,
 
-                p_name_id:
-                nameId,
+                    p_name_id:
+                    nameId,
 
-                p_amount_rub:
-                amount,
+                    p_amount_rub:
+                    amount,
 
-                p_votes_count:
-                votes,
-            }
-        );
+                    p_votes_count:
+                    votes,
+                }
+            );
 
 
         if (error) {
@@ -223,6 +230,12 @@ export async function POST(request) {
             );
 
 
+            /*
+              Возвращаем 500.
+
+              Тогда YooKassa сможет
+              повторить уведомление.
+            */
             return NextResponse.json(
                 {
                     error:
@@ -253,6 +266,7 @@ export async function POST(request) {
 
         return NextResponse.json({
             ok: true,
+
             credited:
             data,
         });
