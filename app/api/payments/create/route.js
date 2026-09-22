@@ -1,6 +1,9 @@
-import { NextResponse } from "next/server";
 import crypto from "crypto";
+
+import { NextResponse } from "next/server";
+
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+
 
 export const runtime = "nodejs";
 
@@ -44,14 +47,16 @@ export async function POST(request) {
 
 
         const amount =
-            Number(body?.amount);
+            Number(
+                body?.amount
+            );
 
 
         if (!nameId) {
             return NextResponse.json(
                 {
                     error:
-                        "Не передано имя",
+                        "Name ID is missing",
                 },
                 {
                     status: 400,
@@ -77,33 +82,49 @@ export async function POST(request) {
         }
 
 
+        /*
+          1 ₽ = 1 голос
+        */
+        const votes =
+            amount;
+
+
         const supabase =
             getSupabaseAdmin();
 
 
+        /*
+          Проверяем имя
+        */
         const {
             data: name,
             error: nameError,
-        } = await supabase
-            .from("names")
-            .select(
-                "id,name,slug,is_active"
-            )
-            .eq(
-                "id",
-                nameId
-            )
-            .eq(
-                "is_active",
-                true
-            )
-            .maybeSingle();
+        } =
+            await supabase
+                .from("names")
+                .select(
+                    "id,name,slug,is_active"
+                )
+                .eq(
+                    "id",
+                    nameId
+                )
+                .eq(
+                    "is_active",
+                    true
+                )
+                .single();
 
 
         if (
             nameError ||
             !name
         ) {
+            console.error(
+                "Name lookup error:",
+                nameError
+            );
+
             return NextResponse.json(
                 {
                     error:
@@ -116,18 +137,15 @@ export async function POST(request) {
         }
 
 
-        /*
-          1 ₽ = 1 голос
-        */
-        const votes =
-            amount;
-
-
         const siteUrl =
-            process.env.NEXT_PUBLIC_SITE_URL ||
-            "https://proactive-expression-production-a967.up.railway.app";
+            process.env
+                .NEXT_PUBLIC_SITE_URL ||
+            "https://womenname.ru";
 
 
+        /*
+          Создаём платёж в ЮKassa
+        */
         const response =
             await fetch(
                 "https://api.yookassa.ru/v3/payments",
@@ -138,11 +156,11 @@ export async function POST(request) {
                         Authorization:
                             getAuthHeader(),
 
-                        "Idempotence-Key":
-                            crypto.randomUUID(),
-
                         "Content-Type":
                             "application/json",
+
+                        "Idempotence-Key":
+                            crypto.randomUUID(),
                     },
 
                     body:
@@ -155,17 +173,14 @@ export async function POST(request) {
                                     "RUB",
                             },
 
-                            capture:
-                                true,
+                            capture: true,
 
                             confirmation: {
                                 type:
                                     "redirect",
 
                                 return_url:
-                                    `${siteUrl}/?payment=success&name=${encodeURIComponent(
-                                        name.slug
-                                    )}`,
+                                    `${siteUrl}/?payment=success`,
                             },
 
                             description:
@@ -173,22 +188,15 @@ export async function POST(request) {
 
                             metadata: {
                                 name_id:
-                                    String(
-                                        name.id
-                                    ),
+                                name.id,
 
                                 name:
                                 name.name,
 
                                 votes:
-                                    String(
-                                        votes
-                                    ),
+                                    String(votes),
                             },
                         }),
-
-                    cache:
-                        "no-store",
                 }
             );
 
@@ -199,46 +207,133 @@ export async function POST(request) {
 
         if (!response.ok) {
             console.error(
-                "YooKassa error:",
+                "YooKassa create error:",
                 payment
             );
 
             return NextResponse.json(
                 {
                     error:
+                        payment?.description ||
                         "Не удалось создать платёж",
                 },
                 {
-                    status: 502,
+                    status:
+                    response.status,
                 }
             );
         }
 
 
-        const confirmationUrl =
-            payment
-                ?.confirmation
-                ?.confirmation_url;
+        if (
+            !payment?.id ||
+            !payment?.confirmation?.confirmation_url
+        ) {
+            console.error(
+                "Invalid YooKassa payment:",
+                payment
+            );
 
-
-        if (!confirmationUrl) {
             return NextResponse.json(
                 {
                     error:
-                        "Не получена ссылка на оплату",
+                        "Некорректный ответ ЮKassa",
                 },
                 {
-                    status: 502,
+                    status: 500,
                 }
             );
         }
+
+
+        /*
+          ВАЖНО:
+
+          Платёж ещё НЕ оплачен.
+
+          Но мы уже сохраняем его,
+          чтобы потом сервер сам
+          мог проверить статус.
+        */
+        const {
+            error: orderError,
+        } =
+            await supabase
+                .from(
+                    "payment_orders"
+                )
+                .insert({
+                    payment_id:
+                    payment.id,
+
+                    name_id:
+                    name.id,
+
+                    amount_rub:
+                    amount,
+
+                    votes_count:
+                    votes,
+
+                    status:
+                        payment.status ||
+                        "pending",
+
+                    credited:
+                        false,
+                });
+
+
+        if (orderError) {
+            console.error(
+                "Could not save payment order:",
+                orderError
+            );
+
+
+            /*
+              Здесь лучше НЕ отправлять
+              человека на оплату.
+
+              Иначе деньги могут быть
+              оплачены, а payment_id
+              мы потеряем.
+            */
+            return NextResponse.json(
+                {
+                    error:
+                        "Не удалось сохранить платёж",
+                },
+                {
+                    status: 500,
+                }
+            );
+        }
+
+
+        console.log(
+            "Payment created:",
+            {
+                paymentId:
+                payment.id,
+
+                name:
+                name.name,
+
+                amount,
+
+                votes,
+            }
+        );
 
 
         return NextResponse.json({
             paymentId:
             payment.id,
 
-            confirmationUrl,
+            confirmationUrl:
+            payment.confirmation
+                .confirmation_url,
         });
 
     } catch (error) {
