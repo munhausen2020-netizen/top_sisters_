@@ -181,8 +181,6 @@ export default function PaidVoteButton({
                                                     : "var(--green)",
                                         }}
                                     >
-                                        +{value}
-                                        <br />
                                         {value} ₽
                                     </button>
                                 )
