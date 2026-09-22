@@ -29,29 +29,7 @@ export default function PaymentReturnVerifier() {
         let cancelled = false;
 
 
-        async function sleep(ms) {
-            return new Promise(
-                (resolve) =>
-                    setTimeout(
-                        resolve,
-                        ms
-                    )
-            );
-        }
-
-
         async function verifyPayment() {
-            /*
-              Главное изменение:
-
-              больше НЕ проверяем
-              ?payment=success.
-
-              Если paymentId есть в
-              localStorage — проверяем
-              платёж при любом заходе
-              на сайт.
-            */
             const paymentId =
                 window.localStorage
                     .getItem(
@@ -59,15 +37,15 @@ export default function PaymentReturnVerifier() {
                     );
 
 
-            /*
-              Pending платежа нет —
-              ничего делать не нужно.
-            */
             if (!paymentId) {
                 return;
             }
 
 
+            /*
+              Показываем короткую плашку,
+              но не зависаем на несколько секунд.
+            */
             setIsError(false);
 
             setMessage(
@@ -75,262 +53,185 @@ export default function PaymentReturnVerifier() {
             );
 
 
-            /*
-              Делаем несколько быстрых
-              попыток.
+            try {
+                const response =
+                    await fetch(
+                        "/api/payments/verify",
+                        {
+                            method:
+                                "POST",
 
-              Это полезно, если человек
-              вернулся на сайт буквально
-              сразу после оплаты, а YooKassa
-              ещё секунду-две обновляет статус.
-            */
-            for (
-                let attempt = 1;
-                attempt <= 6;
-                attempt += 1
-            ) {
-                if (cancelled) {
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    paymentId,
+                                }),
+
+                            cache:
+                                "no-store",
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                /*
+                  YooKassa ещё не успела
+                  перевести платёж в succeeded.
+
+                  Ничего не удаляем.
+                  Просто убираем плашку.
+
+                  На следующем заходе
+                  проверим снова.
+                */
+                if (
+                    response.status ===
+                    202
+                ) {
+                    if (
+                        !cancelled
+                    ) {
+                        setMessage("");
+                    }
+
                     return;
                 }
 
 
-                try {
-                    const response =
-                        await fetch(
-                            "/api/payments/verify",
-                            {
-                                method:
-                                    "POST",
-
-                                headers: {
-                                    "Content-Type":
-                                        "application/json",
-                                },
-
-                                body:
-                                    JSON.stringify({
-                                        paymentId,
-                                    }),
-
-                                cache:
-                                    "no-store",
-                            }
-                        );
-
-
-                    const data =
-                        await response.json();
-
-
-                    /*
-                      Платёж ещё pending.
-
-                      Ждём немного и
-                      проверяем снова.
-                    */
-                    if (
-                        response.status ===
-                        202
-                    ) {
-                        if (
-                            attempt < 6
-                        ) {
-                            await sleep(
-                                1000
-                            );
-
-                            continue;
-                        }
-
-
-                        if (
-                            !cancelled
-                        ) {
-                            setIsError(
-                                false
-                            );
-
-                            setMessage(
-                                "ПЛАТЁЖ ОБРАБАТЫВАЕТСЯ..."
-                            );
-                        }
-
-
-                        return;
-                    }
-
-
-                    /*
-                      Например платёж отменён.
-                    */
-                    if (
-                        response.status ===
-                        400 &&
-                        data?.status ===
-                        "canceled"
-                    ) {
-                        window.localStorage
-                            .removeItem(
-                                PAYMENT_STORAGE_KEY
-                            );
-
-
-                        if (
-                            !cancelled
-                        ) {
-                            setIsError(
-                                true
-                            );
-
-                            setMessage(
-                                "ПЛАТЁЖ ОТМЕНЁН"
-                            );
-                        }
-
-
-                        return;
-                    }
-
-
-                    if (
-                        !response.ok
-                    ) {
-                        throw new Error(
-                            data?.error ||
-                            "Ошибка проверки платежа"
-                        );
-                    }
-
-
-                    /*
-                      Успех.
-
-                      Убираем paymentId,
-                      потому что этот платёж
-                      больше проверять не надо.
-                    */
+                /*
+                  Платёж отменён.
+                */
+                if (
+                    response.status ===
+                    400 &&
+                    data?.status ===
+                    "canceled"
+                ) {
                     window.localStorage
                         .removeItem(
                             PAYMENT_STORAGE_KEY
                         );
 
 
-                    if (cancelled) {
-                        return;
-                    }
-
-
-                    setIsError(false);
-
-
-                    if (
-                        data.credited ===
-                        true
-                    ) {
-                        setMessage(
-                            `+${data.votes} ГОЛОСОВ ЗАЧИСЛЕНО`
-                        );
-                    } else {
-                        /*
-                          Если webhook или cron
-                          уже успел обработать
-                          этот payment_id.
-                        */
-                        setMessage(
-                            "ГОЛОСЫ УЖЕ ЗАЧИСЛЕНЫ"
-                        );
-                    }
-
-
-                    /*
-                      Убираем параметры оплаты
-                      из URL, если они остались.
-                    */
-                    const cleanUrl =
-                        window.location.pathname;
-
-
-                    window.history
-                        .replaceState(
-                            {},
-                            "",
-                            cleanUrl
-                        );
-
-
-                    /*
-                      Обновляем Server Components,
-                      чтобы сразу подтянулся
-                      новый рейтинг из Supabase.
-                    */
-                    router.refresh();
-
-
-                    /*
-                      Через несколько секунд
-                      убираем уведомление.
-                    */
-                    setTimeout(
-                        () => {
-                            if (
-                                !cancelled
-                            ) {
-                                setMessage(
-                                    ""
-                                );
-                            }
-                        },
-                        4000
-                    );
-
-
-                    return;
-
-                } catch (error) {
-                    console.error(
-                        "Payment verification error:",
-                        error
-                    );
-
-
-                    /*
-                      Если это была не последняя
-                      попытка — пробуем ещё раз.
-                    */
-                    if (
-                        attempt < 6
-                    ) {
-                        await sleep(
-                            1000
-                        );
-
-                        continue;
-                    }
-
-
-                    /*
-                      ВАЖНО:
-
-                      paymentId НЕ удаляем.
-
-                      Значит при следующем заходе
-                      пользователя на сайт мы снова
-                      попробуем проверить платёж.
-                    */
                     if (
                         !cancelled
                     ) {
-                        setIsError(
-                            true
-                        );
+                        setIsError(true);
 
                         setMessage(
-                            "НЕ УДАЛОСЬ ПРОВЕРИТЬ ОПЛАТУ"
+                            "ПЛАТЁЖ ОТМЕНЁН"
                         );
+
+
+                        setTimeout(() => {
+                            if (
+                                !cancelled
+                            ) {
+                                setMessage("");
+                            }
+                        }, 2500);
                     }
 
 
                     return;
+                }
+
+
+                if (
+                    !response.ok
+                ) {
+                    throw new Error(
+                        data?.error ||
+                        "Ошибка проверки платежа"
+                    );
+                }
+
+
+                /*
+                  Успех.
+                */
+                window.localStorage
+                    .removeItem(
+                        PAYMENT_STORAGE_KEY
+                    );
+
+
+                if (
+                    cancelled
+                ) {
+                    return;
+                }
+
+
+                setIsError(false);
+
+
+                if (
+                    data.credited ===
+                    true
+                ) {
+                    setMessage(
+                        `+${data.votes} ГОЛОСОВ ЗАЧИСЛЕНО`
+                    );
+                } else {
+                    setMessage(
+                        "ГОЛОСЫ УЖЕ ЗАЧИСЛЕНЫ"
+                    );
+                }
+
+
+                /*
+                  Убираем параметры
+                  оплаты из URL.
+                */
+                window.history
+                    .replaceState(
+                        {},
+                        "",
+                        window.location.pathname
+                    );
+
+
+                /*
+                  Сразу обновляем рейтинг.
+                */
+                router.refresh();
+
+
+                setTimeout(() => {
+                    if (
+                        !cancelled
+                    ) {
+                        setMessage("");
+                    }
+                }, 2500);
+
+            } catch (error) {
+                console.error(
+                    "Payment verification error:",
+                    error
+                );
+
+
+                /*
+                  Даже при ошибке не держим
+                  пользователя на плашке.
+
+                  paymentId остаётся,
+                  поэтому при следующем заходе
+                  проверка повторится.
+                */
+                if (
+                    !cancelled
+                ) {
+                    setMessage("");
                 }
             }
         }
