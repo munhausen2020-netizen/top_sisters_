@@ -2,16 +2,32 @@
 
 import { useState } from "react";
 
+const PAYMENT_STORAGE_KEY =
+    "womenname_pending_payment_id";
+
+
 export default function PaidVoteButton({
                                            nameId,
                                            name,
                                            compact = false,
                                        }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [amount, setAmount] = useState(100);
-    const [customAmount, setCustomAmount] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    const [isOpen, setIsOpen] =
+        useState(false);
+
+    const [amount, setAmount] =
+        useState(100);
+
+    const [
+        customAmount,
+        setCustomAmount,
+    ] = useState("");
+
+    const [loading, setLoading] =
+        useState(false);
+
+    const [error, setError] =
+        useState("");
+
 
     function closeModal() {
         if (loading) {
@@ -24,45 +40,63 @@ export default function PaidVoteButton({
         setAmount(100);
     }
 
+
     async function startPayment() {
         if (loading) {
             return;
         }
 
-        const finalAmount = customAmount
-            ? Number(customAmount)
-            : amount;
+
+        const finalAmount =
+            customAmount
+                ? Number(customAmount)
+                : amount;
+
 
         if (
-            !Number.isInteger(finalAmount) ||
+            !Number.isInteger(
+                finalAmount
+            ) ||
             finalAmount < 1 ||
             finalAmount > 5000
         ) {
-            setError("ВВЕДИ СУММУ ОТ 1 ДО 5000 ₽");
+            setError(
+                "ВВЕДИ СУММУ ОТ 1 ДО 5000 ₽"
+            );
+
             return;
         }
+
 
         setLoading(true);
         setError("");
 
+
         try {
-            const response = await fetch(
-                "/api/payments/create",
-                {
-                    method: "POST",
+            const response =
+                await fetch(
+                    "/api/payments/create",
+                    {
+                        method: "POST",
 
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                        },
 
-                    body: JSON.stringify({
-                        nameId,
-                        amount: finalAmount,
-                    }),
-                }
-            );
+                        body:
+                            JSON.stringify({
+                                nameId,
+                                amount:
+                                finalAmount,
+                            }),
+                    }
+                );
 
-            const data = await response.json();
+
+            const data =
+                await response.json();
+
 
             if (!response.ok) {
                 throw new Error(
@@ -71,32 +105,62 @@ export default function PaidVoteButton({
                 );
             }
 
-            if (!data?.confirmationUrl) {
+
+            if (
+                !data?.paymentId
+            ) {
+                throw new Error(
+                    "НЕ ПОЛУЧЕН ID ПЛАТЕЖА"
+                );
+            }
+
+
+            if (
+                !data
+                    ?.confirmationUrl
+            ) {
                 throw new Error(
                     "НЕ ПОЛУЧЕНА ССЫЛКА НА ОПЛАТУ"
                 );
             }
 
+
+            /*
+              Сохраняем paymentId ДО ухода
+              пользователя на ЮKassa.
+            */
+            window.localStorage.setItem(
+                PAYMENT_STORAGE_KEY,
+                data.paymentId
+            );
+
+
             window.location.href =
                 data.confirmationUrl;
+
         } catch (error) {
             console.error(
                 "Payment error:",
                 error
             );
 
+
             setError(
                 error?.message ||
                 "ОШИБКА ОПЛАТЫ"
             );
 
+
             setLoading(false);
         }
     }
 
-    const finalAmount = customAmount
-        ? Number(customAmount) || 0
-        : amount;
+
+    const finalAmount =
+        customAmount
+            ? Number(customAmount) || 0
+            : amount;
+
 
     return (
         <>
@@ -119,10 +183,14 @@ export default function PaidVoteButton({
                 </button>
             </div>
 
+
             {isOpen && (
                 <div
                     className="vote-modal-overlay"
-                    onMouseDown={(event) => {
+
+                    onMouseDown={(
+                        event
+                    ) => {
                         if (
                             event.target ===
                             event.currentTarget
@@ -132,24 +200,31 @@ export default function PaidVoteButton({
                     }}
                 >
                     <div className="vote-modal">
+
                         <div className="vote-modal-label">
                             {">"} ПОДНЯТЬ ИМЯ
                         </div>
+
 
                         <div className="vote-modal-title">
                             {name.toUpperCase()}
                         </div>
 
+
                         <div className="vote-modal-note">
                             1 ₽ = 1 ГОЛОС
                         </div>
 
+
                         <div
                             style={{
                                 display: "grid",
+
                                 gridTemplateColumns:
                                     "repeat(3, 1fr)",
+
                                 gap: "8px",
+
                                 marginTop: "22px",
                             }}
                         >
@@ -157,16 +232,33 @@ export default function PaidVoteButton({
                                 (value) => (
                                     <button
                                         key={value}
+
                                         type="button"
-                                        className="terminal-button"
-                                        disabled={loading}
+
+                                        className=
+                                            "terminal-button"
+
+                                        disabled={
+                                            loading
+                                        }
+
                                         onClick={() => {
-                                            setAmount(value);
-                                            setCustomAmount("");
-                                            setError("");
+                                            setAmount(
+                                                value
+                                            );
+
+                                            setCustomAmount(
+                                                ""
+                                            );
+
+                                            setError(
+                                                ""
+                                            );
                                         }}
+
                                         style={{
-                                            minHeight: "58px",
+                                            minHeight:
+                                                "58px",
 
                                             background:
                                                 !customAmount &&
@@ -187,90 +279,143 @@ export default function PaidVoteButton({
                             )}
                         </div>
 
+
                         <div
                             style={{
-                                marginTop: "10px",
+                                marginTop:
+                                    "10px",
                             }}
                         >
                             <input
                                 type="number"
+
                                 min="1"
+
                                 max="5000"
-                                inputMode="numeric"
-                                value={customAmount}
-                                disabled={loading}
-                                placeholder="ДРУГАЯ СУММА"
-                                onChange={(event) => {
+
+                                inputMode=
+                                    "numeric"
+
+                                value={
+                                    customAmount
+                                }
+
+                                disabled={
+                                    loading
+                                }
+
+                                placeholder=
+                                    "ДРУГАЯ СУММА"
+
+                                onChange={(
+                                    event
+                                ) => {
                                     setCustomAmount(
-                                        event.target.value
+                                        event.target
+                                            .value
                                     );
 
                                     setError("");
                                 }}
+
                                 style={{
                                     width: "100%",
-                                    minHeight: "54px",
+
+                                    minHeight:
+                                        "54px",
 
                                     border:
                                         "2px solid var(--green)",
 
                                     outline: "none",
 
-                                    padding: "0 12px",
+                                    padding:
+                                        "0 12px",
 
-                                    background: "#000",
+                                    background:
+                                        "#000",
 
-                                    color: "var(--green)",
+                                    color:
+                                        "var(--green)",
 
                                     fontFamily:
                                         "var(--font-pixel), monospace",
 
-                                    fontSize: "16px",
+                                    fontSize:
+                                        "16px",
 
-                                    textAlign: "center",
+                                    textAlign:
+                                        "center",
                                 }}
                             />
                         </div>
 
+
                         {error && (
                             <div
                                 style={{
-                                    marginTop: "14px",
+                                    marginTop:
+                                        "14px",
 
                                     color:
                                         "var(--danger)",
 
-                                    fontSize: "8px",
+                                    fontSize:
+                                        "8px",
 
-                                    lineHeight: "1.7",
+                                    lineHeight:
+                                        "1.7",
 
-                                    textAlign: "center",
+                                    textAlign:
+                                        "center",
                                 }}
                             >
                                 {error}
                             </div>
                         )}
 
+
                         <div className="vote-modal-actions">
+
                             <button
                                 type="button"
-                                className="vote-modal-cancel"
-                                disabled={loading}
-                                onClick={closeModal}
+
+                                className=
+                                    "vote-modal-cancel"
+
+                                disabled={
+                                    loading
+                                }
+
+                                onClick={
+                                    closeModal
+                                }
                             >
                                 НАЗАД
                             </button>
 
+
                             <button
                                 type="button"
-                                className="vote-modal-confirm"
-                                disabled={loading}
-                                onClick={startPayment}
+
+                                className=
+                                    "vote-modal-confirm"
+
+                                disabled={
+                                    loading
+                                }
+
+                                onClick={
+                                    startPayment
+                                }
                             >
                                 {loading ? (
                                     <span className="loading-content">
+
                     <span className="inline-loader dark" />
+
                     ПЕРЕХОД...
+
                   </span>
                                 ) : (
                                     <>
@@ -280,7 +425,9 @@ export default function PaidVoteButton({
                                     </>
                                 )}
                             </button>
+
                         </div>
+
                     </div>
                 </div>
             )}
