@@ -4,72 +4,198 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 export const runtime = "nodejs";
 
 
-function getAuthHeader() {
-    const shopId =
-        process.env.YOOKASSA_SHOP_ID;
+function getClientIp(request) {
+    const forwarded =
+        request.headers.get("x-forwarded-for");
 
-    const secretKey =
-        process.env.YOOKASSA_SECRET_KEY;
-
-
-    if (!shopId || !secretKey) {
-        throw new Error(
-            "YooKassa credentials are missing"
-        );
+    if (forwarded) {
+        return forwarded
+            .split(",")[0]
+            .trim();
     }
 
-
     return (
-        "Basic " +
-        Buffer
-            .from(
-                `${shopId}:${secretKey}`
-            )
-            .toString("base64")
+        request.headers.get("x-real-ip") ||
+        ""
     );
 }
 
 
-async function getPayment(paymentId) {
-    const response =
-        await fetch(
-            `https://api.yookassa.ru/v3/payments/${paymentId}`,
+function ipToInt(ip) {
+    return ip
+        .split(".")
+        .reduce(
+            (acc, part) =>
+                (acc << 8) +
+                Number(part),
+            0
+        ) >>> 0;
+}
+
+
+function isIpInCidr(
+    ip,
+    cidr
+) {
+    const [
+        network,
+        prefixLength,
+    ] =
+        cidr.split("/");
+
+    const prefix =
+        Number(
+            prefixLength
+        );
+
+    const ipInt =
+        ipToInt(ip);
+
+    const networkInt =
+        ipToInt(network);
+
+    const mask =
+        prefix === 0
+            ? 0
+            : (
+            0xffffffff <<
+            (32 - prefix)
+        ) >>> 0;
+
+    return (
+        (ipInt & mask) ===
+        (networkInt & mask)
+    );
+}
+
+
+function isYooKassaIp(ip) {
+    if (!ip) {
+        return false;
+    }
+
+
+    /*
+      IPv6 диапазон ЮKassa.
+      Пока просто разрешаем их
+      известный префикс.
+    */
+    if (
+        ip
+            .toLowerCase()
+            .startsWith(
+                "2a02:5180:"
+            )
+    ) {
+        return true;
+    }
+
+
+    /*
+      IPv4 диапазоны из документации
+      ЮKassa.
+    */
+    const cidrs = [
+        "185.71.76.0/27",
+        "185.71.77.0/27",
+        "77.75.153.0/25",
+        "77.75.154.128/25",
+    ];
+
+
+    const exactIps = [
+        "77.75.156.11",
+        "77.75.156.35",
+    ];
+
+
+    if (
+        exactIps.includes(ip)
+    ) {
+        return true;
+    }
+
+
+    if (
+        !/^\d+\.\d+\.\d+\.\d+$/.test(
+            ip
+        )
+    ) {
+        return false;
+    }
+
+
+    return cidrs.some(
+        (cidr) =>
+            isIpInCidr(
+                ip,
+                cidr
+            )
+    );
+}
+
+
+export async function POST(
+    request
+) {
+    const startedAt =
+        Date.now();
+
+    try {
+        const clientIp =
+            getClientIp(
+                request
+            );
+
+
+        console.log(
+            "YooKassa webhook received:",
             {
-                method: "GET",
-
-                headers: {
-                    Authorization:
-                        getAuthHeader(),
-                },
-
-                cache: "no-store",
+                clientIp,
             }
         );
 
 
-    if (!response.ok) {
-        const text =
-            await response.text();
+        /*
+          Проверяем источник.
 
-        throw new Error(
-            `YooKassa check failed: ${text}`
-        );
-    }
+          ВАЖНО:
+          Railway обычно передаёт
+          реальный IP через
+          x-forwarded-for.
+        */
+        if (
+            !isYooKassaIp(
+                clientIp
+            )
+        ) {
+            console.error(
+                "Webhook rejected: invalid IP",
+                {
+                    clientIp,
+                }
+            );
 
 
-    return response.json();
-}
+            return NextResponse.json(
+                {
+                    error:
+                        "Invalid source",
+                },
+                {
+                    status: 403,
+                }
+            );
+        }
 
 
-export async function POST(request) {
-    try {
         const notification =
             await request.json();
 
 
         /*
-          Нас интересует только
-          успешный платёж.
+          Другие события нам
+          сейчас не нужны.
         */
         if (
             notification?.event !==
@@ -81,13 +207,13 @@ export async function POST(request) {
         }
 
 
-        const paymentId =
-            notification
-                ?.object
-                ?.id;
+        const payment =
+            notification?.object;
 
 
-        if (!paymentId) {
+        if (
+            !payment?.id
+        ) {
             return NextResponse.json(
                 {
                     error:
@@ -101,17 +227,9 @@ export async function POST(request) {
 
 
         /*
-          Не доверяем webhook вслепую.
-
-          Повторно спрашиваем YooKassa
-          о реальном статусе платежа.
+          Сам webhook уже содержит
+          актуальный объект платежа.
         */
-        const payment =
-            await getPayment(
-                paymentId
-            );
-
-
         if (
             payment.status !==
             "succeeded" ||
@@ -169,19 +287,31 @@ export async function POST(request) {
 
 
         /*
-          У нас логика:
-          1 ₽ = 1 голос.
+          1 ₽ = 1 голос
         */
         if (
             !nameId ||
-            !Number.isInteger(amount) ||
+            !Number.isInteger(
+                amount
+            ) ||
             amount <= 0 ||
-            !Number.isInteger(votes) ||
+            !Number.isInteger(
+                votes
+            ) ||
             votes !== amount
         ) {
             console.error(
-                "Invalid payment:",
-                payment
+                "Invalid webhook payment:",
+                {
+                    paymentId:
+                    payment.id,
+
+                    amount,
+
+                    votes,
+
+                    nameId,
+                }
             );
 
 
@@ -233,8 +363,8 @@ export async function POST(request) {
             /*
               Возвращаем 500.
 
-              Тогда YooKassa сможет
-              повторить уведомление.
+              Тогда ЮKassa повторит
+              доставку уведомления.
             */
             return NextResponse.json(
                 {
@@ -260,12 +390,17 @@ export async function POST(request) {
 
                 credited:
                 data,
+
+                durationMs:
+                    Date.now() -
+                    startedAt,
             }
         );
 
 
         return NextResponse.json({
-            ok: true,
+            ok:
+                true,
 
             credited:
             data,
