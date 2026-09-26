@@ -7,7 +7,6 @@ import {
 } from "next/font/google";
 
 
-
 const pressStart2P =
     Press_Start_2P({
         weight: "400",
@@ -39,18 +38,19 @@ export default function RootLayout({
                                    }) {
     return (
         <html lang="ru">
+
         <body
             className={
                 pressStart2P.variable
             }
         >
+
         {children}
-
-
 
 
         {/* =========================
             YANDEX METRIKA
+            ALTERNATIVE CDN
         ========================= */}
 
         <Script
@@ -58,36 +58,56 @@ export default function RootLayout({
             strategy="afterInteractive"
         >
             {`
-            (function(m,e,t,r,i,k,a){
-              m[i]=m[i]||function(){
-                (m[i].a=m[i].a||[]).push(arguments)
-              };
+                (function(m,e,t,r,i,k,a){
+                    m[i]=m[i]||function(){
+                        (m[i].a=m[i].a||[]).push(arguments)
+                    };
 
-              m[i].l=1*new Date();
+                    m[i].l=1*new Date();
 
-              k=e.createElement(t);
-              a=e.getElementsByTagName(t)[0];
+                    for (
+                        var j = 0;
+                        j < document.scripts.length;
+                        j++
+                    ) {
+                        if (
+                            document.scripts[j].src === r
+                        ) {
+                            return;
+                        }
+                    }
 
-              k.async=1;
-              k.src=r;
+                    k=e.createElement(t);
+                    a=e.getElementsByTagName(t)[0];
 
-              a.parentNode.insertBefore(k,a);
+                    k.async=1;
+                    k.src=r;
 
-            })(
-              window,
-              document,
-              "script",
-              "https://mc.yandex.ru/metrika/tag.js",
-              "ym"
-            );
+                    a.parentNode.insertBefore(k,a);
 
-            ym(112874757, "init", {
-              clickmap: true,
-              trackLinks: true,
-              accurateTrackBounce: true,
-              webvisor: true
-            });
-          `}
+                })(
+                    window,
+                    document,
+                    "script",
+                    "https://mc.webvisor.org/metrika/tag_ww.js?id=112874757",
+                    "ym"
+                );
+
+                ym(
+                    112874757,
+                    "init",
+                    {
+                        ssr: true,
+                        webvisor: true,
+                        clickmap: true,
+                        ecommerce: "dataLayer",
+                        referrer: document.referrer,
+                        url: location.href,
+                        accurateTrackBounce: true,
+                        trackLinks: true
+                    }
+                );
+            `}
         </Script>
 
 
@@ -119,79 +139,79 @@ export default function RootLayout({
             strategy="afterInteractive"
         >
             {`
-            var _tmr =
-              window._tmr ||
-              (window._tmr = []);
+                var _tmr =
+                    window._tmr ||
+                    (window._tmr = []);
 
-            _tmr.push({
-              id: "3796075",
-              type: "pageView",
-              start: (new Date()).getTime()
-            });
+                _tmr.push({
+                    id: "3796075",
+                    type: "pageView",
+                    start: (new Date()).getTime()
+                });
 
-            (function(d, w, id) {
+                (function(d, w, id) {
 
-              if (
-                d.getElementById(id)
-              ) {
-                return;
-              }
+                    if (
+                        d.getElementById(id)
+                    ) {
+                        return;
+                    }
 
-              var ts =
-                d.createElement(
-                  "script"
+                    var ts =
+                        d.createElement(
+                            "script"
+                        );
+
+                    ts.type =
+                        "text/javascript";
+
+                    ts.async =
+                        true;
+
+                    ts.id =
+                        id;
+
+                    ts.src =
+                        "https://top-fwz1.mail.ru/js/code.js";
+
+
+                    var f = function () {
+
+                        var s =
+                            d.getElementsByTagName(
+                                "script"
+                            )[0];
+
+                        s.parentNode
+                            .insertBefore(
+                                ts,
+                                s
+                            );
+                    };
+
+
+                    if (
+                        w.opera ==
+                        "[object Opera]"
+                    ) {
+
+                        d.addEventListener(
+                            "DOMContentLoaded",
+                            f,
+                            false
+                        );
+
+                    } else {
+
+                        f();
+                    }
+
+                })(
+                    document,
+                    window,
+                    "tmr-code"
                 );
-
-              ts.type =
-                "text/javascript";
-
-              ts.async =
-                true;
-
-              ts.id =
-                id;
-
-              ts.src =
-                "https://top-fwz1.mail.ru/js/code.js";
-
-
-              var f = function () {
-
-                var s =
-                  d.getElementsByTagName(
-                    "script"
-                  )[0];
-
-                s.parentNode
-                  .insertBefore(
-                    ts,
-                    s
-                  );
-              };
-
-
-              if (
-                w.opera ==
-                "[object Opera]"
-              ) {
-
-                d.addEventListener(
-                  "DOMContentLoaded",
-                  f,
-                  false
-                );
-
-              } else {
-
-                f();
-              }
-
-            })(
-              document,
-              window,
-              "tmr-code"
-            );
-          `}
+            `}
         </Script>
 
 
@@ -214,6 +234,7 @@ export default function RootLayout({
         </noscript>
 
         </body>
+
         </html>
     );
 }
