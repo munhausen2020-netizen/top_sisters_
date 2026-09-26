@@ -8,7 +8,7 @@ export default function PaidVoteButton({
                                            compact = false,
                                        }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [amount, setAmount] = useState(100);
+    const [amount, setAmount] = useState(30);
     const [customAmount, setCustomAmount] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -20,7 +20,7 @@ export default function PaidVoteButton({
         setIsOpen(false);
         setError("");
         setCustomAmount("");
-        setAmount(100);
+        setAmount(30);
     }
 
 
@@ -146,7 +146,7 @@ export default function PaidVoteButton({
                         setIsOpen(true);
                     }}
                 >
-                    ПОДНЯТЬ
+                    ГОЛОСУЙ
                 </button>
             </div>
 
@@ -167,7 +167,7 @@ export default function PaidVoteButton({
                     <div className="vote-modal">
 
                         <div className="vote-modal-label">
-                            {">"} ПОДНЯТЬ ИМЯ
+                            {">"} ГОЛОСУЙ ЗА ИМЯ
                         </div>
 
 
@@ -190,7 +190,7 @@ export default function PaidVoteButton({
                                 marginTop: "22px",
                             }}
                         >
-                            {[50, 100, 300].map(
+                            {[10, 30, 50].map(
                                 (value) => (
                                     <button
                                         key={value}
@@ -302,9 +302,9 @@ export default function PaidVoteButton({
                             >
                                 {loading ? (
                                     <span className="loading-content">
-                    <span className="inline-loader dark" />
-                    ПЕРЕХОД...
-                  </span>
+                                        <span className="inline-loader dark" />
+                                        ПЕРЕХОД...
+                                    </span>
                                 ) : (
                                     <>
                                         ОПЛАТИТЬ
