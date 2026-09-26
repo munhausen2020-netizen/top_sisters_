@@ -11,15 +11,22 @@ import { useRouter } from "next/navigation";
 import VoteButton from "@/components/VoteButton";
 import { reachGoal } from "@/lib/metrika";
 
+import {
+    trackProductEvent,
+} from "@/lib/product-analytics";
+
+
 const TOP_LIMIT = 10;
 const CONTEXT_BEFORE = 2;
 const CONTEXT_AFTER = 2;
+
 
 function normalize(value) {
     return value
         .trim()
         .toLocaleLowerCase("ru-RU");
 }
+
 
 function RankingRow({
                         item,
@@ -34,26 +41,31 @@ function RankingRow({
                     : "leader-row"
             }
         >
-      <span className="rank">
-        {String(rank).padStart(2, "0")}
-      </span>
+            <span className="rank">
+                {String(rank).padStart(
+                    2,
+                    "0"
+                )}
+            </span>
 
             <span className="leader-name">
-        {item.name}
-      </span>
+                {item.name}
+            </span>
 
             <span
                 className="dots"
                 aria-hidden="true"
             >
-        ................................
-      </span>
+                ................................
+            </span>
 
             <span className="score">
-        {Number(
-            item.score || 0
-        ).toLocaleString("ru-RU")}
-      </span>
+                {Number(
+                    item.score || 0
+                ).toLocaleString(
+                    "ru-RU"
+                )}
+            </span>
 
             <VoteButton
                 nameId={item.id}
@@ -65,69 +77,122 @@ function RankingRow({
     );
 }
 
+
 export default function RankingExperience({
                                               names,
                                           }) {
-    const router = useRouter();
+    const router =
+        useRouter();
 
-    const localRankingRef = useRef(null);
-    const addNameRef = useRef(null);
-    const scrollTimerRef = useRef(null);
+    const localRankingRef =
+        useRef(null);
 
-    const [query, setQuery] = useState("");
-    const [selectedId, setSelectedId] =
-        useState(null);
-    const [status, setStatus] = useState("");
-    const [notFoundName, setNotFoundName] =
+    const addNameRef =
+        useRef(null);
+
+    const scrollTimerRef =
+        useRef(null);
+
+
+    const [query, setQuery] =
         useState("");
-    const [addState, setAddState] =
+
+    const [
+        selectedId,
+        setSelectedId,
+    ] =
+        useState(null);
+
+    const [status, setStatus] =
+        useState("");
+
+    const [
+        notFoundName,
+        setNotFoundName,
+    ] =
+        useState("");
+
+    const [
+        addState,
+        setAddState,
+    ] =
         useState("idle");
 
-    const topNames = useMemo(() => {
-        return names.slice(0, TOP_LIMIT);
-    }, [names]);
 
-    const selectedIndex = useMemo(() => {
-        if (!selectedId) {
-            return -1;
-        }
+    const topNames =
+        useMemo(() => {
+            return names.slice(
+                0,
+                TOP_LIMIT
+            );
+        }, [names]);
 
-        return names.findIndex(
-            (item) => item.id === selectedId
-        );
-    }, [names, selectedId]);
 
-    const localContext = useMemo(() => {
-        if (
-            selectedIndex < TOP_LIMIT ||
-            selectedIndex === -1
-        ) {
-            return [];
-        }
+    const selectedIndex =
+        useMemo(() => {
+            if (!selectedId) {
+                return -1;
+            }
 
-        const start = Math.max(
-            0,
-            selectedIndex - CONTEXT_BEFORE
-        );
+            return names.findIndex(
+                (item) =>
+                    item.id ===
+                    selectedId
+            );
+        }, [
+            names,
+            selectedId,
+        ]);
 
-        const end = Math.min(
-            names.length,
-            selectedIndex + CONTEXT_AFTER + 1
-        );
 
-        return names.slice(start, end);
-    }, [names, selectedIndex]);
+    const localContext =
+        useMemo(() => {
+            if (
+                selectedIndex <
+                TOP_LIMIT ||
+                selectedIndex === -1
+            ) {
+                return [];
+            }
+
+            const start =
+                Math.max(
+                    0,
+                    selectedIndex -
+                    CONTEXT_BEFORE
+                );
+
+            const end =
+                Math.min(
+                    names.length,
+                    selectedIndex +
+                    CONTEXT_AFTER +
+                    1
+                );
+
+            return names.slice(
+                start,
+                end
+            );
+        }, [
+            names,
+            selectedIndex,
+        ]);
+
 
     useEffect(() => {
         if (
-            selectedIndex < TOP_LIMIT ||
+            selectedIndex <
+            TOP_LIMIT ||
             selectedIndex === -1 ||
             localContext.length === 0
         ) {
             return;
         }
 
-        if (scrollTimerRef.current) {
+        if (
+            scrollTimerRef.current
+        ) {
             clearTimeout(
                 scrollTimerRef.current
             );
@@ -135,14 +200,20 @@ export default function RankingExperience({
 
         scrollTimerRef.current =
             setTimeout(() => {
-                localRankingRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                });
+                localRankingRef
+                    .current
+                    ?.scrollIntoView({
+                        behavior:
+                            "smooth",
+                        block:
+                            "start",
+                    });
             }, 350);
 
         return () => {
-            if (scrollTimerRef.current) {
+            if (
+                scrollTimerRef.current
+            ) {
                 clearTimeout(
                     scrollTimerRef.current
                 );
@@ -153,12 +224,15 @@ export default function RankingExperience({
         localContext.length,
     ]);
 
+
     useEffect(() => {
         if (!notFoundName) {
             return;
         }
 
-        if (scrollTimerRef.current) {
+        if (
+            scrollTimerRef.current
+        ) {
             clearTimeout(
                 scrollTimerRef.current
             );
@@ -166,14 +240,20 @@ export default function RankingExperience({
 
         scrollTimerRef.current =
             setTimeout(() => {
-                addNameRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                });
+                addNameRef
+                    .current
+                    ?.scrollIntoView({
+                        behavior:
+                            "smooth",
+                        block:
+                            "center",
+                    });
             }, 350);
 
         return () => {
-            if (scrollTimerRef.current) {
+            if (
+                scrollTimerRef.current
+            ) {
                 clearTimeout(
                     scrollTimerRef.current
                 );
@@ -181,12 +261,19 @@ export default function RankingExperience({
         };
     }, [notFoundName]);
 
+
     function clearSearchResult() {
         setSelectedId(null);
+
         setStatus("");
+
         setNotFoundName("");
-        setAddState("idle");
+
+        setAddState(
+            "idle"
+        );
     }
+
 
     function closeKeyboard() {
         const activeElement =
@@ -201,17 +288,27 @@ export default function RankingExperience({
         }
     }
 
+
     function findName() {
-        const rawQuery = query.trim();
+        const rawQuery =
+            query.trim();
 
         const normalized =
-            normalize(rawQuery);
+            normalize(
+                rawQuery
+            );
+
 
         if (!normalized) {
             clearSearchResult();
+
             return;
         }
 
+
+        /*
+         * YANDEX METRIKA
+         */
         reachGoal(
             "search_name",
             {
@@ -220,22 +317,44 @@ export default function RankingExperience({
             }
         );
 
-        let match = names.find(
-            (item) =>
-                normalize(item.name) ===
-                normalized
-        );
 
-        if (!match) {
-            match = names.find(
+        /*
+         * SUPABASE PRODUCT ANALYTICS
+         *
+         * Событие отправляется один раз
+         * при фактическом запуске поиска.
+         */
+        trackProductEvent({
+            eventName:
+                "search_name",
+
+            name:
+            rawQuery,
+        });
+
+
+        let match =
+            names.find(
                 (item) =>
                     normalize(
                         item.name
-                    ).startsWith(
-                        normalized
-                    )
+                    ) ===
+                    normalized
             );
+
+
+        if (!match) {
+            match =
+                names.find(
+                    (item) =>
+                        normalize(
+                            item.name
+                        ).startsWith(
+                            normalized
+                        )
+                );
         }
+
 
         if (!match) {
             reachGoal(
@@ -246,24 +365,38 @@ export default function RankingExperience({
                 }
             );
 
-            setSelectedId(null);
+
+            setSelectedId(
+                null
+            );
+
 
             setStatus(
                 `ИМЯ «${rawQuery.toUpperCase()}» НЕ НАЙДЕНО`
             );
 
-            setNotFoundName(rawQuery);
 
-            setAddState("idle");
+            setNotFoundName(
+                rawQuery
+            );
+
+
+            setAddState(
+                "idle"
+            );
+
 
             return;
         }
 
+
         const rank =
             names.findIndex(
                 (item) =>
-                    item.id === match.id
+                    item.id ===
+                    match.id
             ) + 1;
+
 
         reachGoal(
             "name_found",
@@ -278,27 +411,40 @@ export default function RankingExperience({
             }
         );
 
-        setSelectedId(match.id);
+
+        setSelectedId(
+            match.id
+        );
+
         setNotFoundName("");
-        setAddState("idle");
+
+        setAddState(
+            "idle"
+        );
+
 
         setStatus(
             `${match.name.toUpperCase()} · #${rank}`
         );
 
+
         if (
-            rank <= TOP_LIMIT
+            rank <=
+            TOP_LIMIT
         ) {
             window.setTimeout(
                 () => {
                     const row =
-                        document.getElementById(
-                            `rank-${match.id}`
-                        );
+                        document
+                            .getElementById(
+                                `rank-${match.id}`
+                            );
+
 
                     row?.scrollIntoView({
                         behavior:
                             "smooth",
+
                         block:
                             "center",
                     });
@@ -308,22 +454,28 @@ export default function RankingExperience({
         }
     }
 
+
     function submit(event) {
         event.preventDefault();
 
         closeKeyboard();
+
         findName();
     }
+
 
     async function addName() {
         if (
             !notFoundName ||
-            addState === "loading"
+            addState ===
+            "loading"
         ) {
             return;
         }
 
+
         closeKeyboard();
+
 
         reachGoal(
             "name_add_click",
@@ -333,15 +485,23 @@ export default function RankingExperience({
             }
         );
 
-        setAddState("loading");
-        setStatus("ПРОВЕРЯЕМ ИМЯ...");
+
+        setAddState(
+            "loading"
+        );
+
+        setStatus(
+            "ПРОВЕРЯЕМ ИМЯ..."
+        );
+
 
         try {
             const response =
                 await fetch(
                     "/api/names/suggest",
                     {
-                        method: "POST",
+                        method:
+                            "POST",
 
                         headers: {
                             "Content-Type":
@@ -356,11 +516,18 @@ export default function RankingExperience({
                     }
                 );
 
+
             const data =
                 await response.json();
 
-            if (!response.ok) {
-                setAddState("error");
+
+            if (
+                !response.ok
+            ) {
+                setAddState(
+                    "error"
+                );
+
 
                 reachGoal(
                     "name_rejected",
@@ -374,42 +541,70 @@ export default function RankingExperience({
                     }
                 );
 
+
                 setStatus(
                     data.error ||
                     "НЕ УДАЛОСЬ ПРОВЕРИТЬ ИМЯ"
                 );
 
+
                 return;
             }
 
+
+            /*
+             * Имя уже существует.
+             *
+             * name_added НЕ отправляем,
+             * потому что нового имени
+             * фактически не появилось.
+             */
             if (
                 data.alreadyExists
             ) {
-                setAddState("done");
+                setAddState(
+                    "done"
+                );
+
 
                 setQuery(
                     data.name.name
                 );
 
+
                 setSelectedId(
                     data.name.id
                 );
 
-                setNotFoundName("");
+
+                setNotFoundName(
+                    ""
+                );
+
 
                 setStatus(
                     `${data.name.name.toUpperCase()} УЖЕ ЕСТЬ В РЕЙТИНГЕ`
                 );
 
+
                 router.refresh();
+
 
                 return;
             }
 
+
+            /*
+             * Имя действительно прошло
+             * проверку и было добавлено.
+             */
             if (
                 data.decision ===
                 "approved"
             ) {
+                /*
+                 * YANDEX METRIKA
+                 */
                 reachGoal(
                     "name_added",
                     {
@@ -418,32 +613,65 @@ export default function RankingExperience({
                     }
                 );
 
-                setAddState("done");
+
+                /*
+                 * SUPABASE PRODUCT ANALYTICS
+                 */
+                trackProductEvent({
+                    eventName:
+                        "name_added",
+
+                    nameId:
+                    data.name.id,
+
+                    name:
+                    data.name.name,
+                });
+
+
+                setAddState(
+                    "done"
+                );
+
 
                 setQuery(
                     data.name.name
                 );
 
+
                 setSelectedId(
                     data.name.id
                 );
 
-                setNotFoundName("");
+
+                setNotFoundName(
+                    ""
+                );
+
 
                 setStatus(
                     `${data.name.name.toUpperCase()} ДОБАВЛЕНА ✓`
                 );
 
+
                 router.refresh();
+
 
                 return;
             }
 
+
+            /*
+             * Требуется ручная проверка.
+             */
             if (
                 data.decision ===
                 "review"
             ) {
-                setAddState("review");
+                setAddState(
+                    "review"
+                );
+
 
                 reachGoal(
                     "name_rejected",
@@ -456,15 +684,24 @@ export default function RankingExperience({
                     }
                 );
 
-                setNotFoundName("");
+
+                setNotFoundName(
+                    ""
+                );
+
 
                 setStatus(
                     "НЕ УДАЛОСЬ АВТОМАТИЧЕСКИ ПОДТВЕРДИТЬ ИМЯ"
                 );
 
+
                 return;
             }
 
+
+            /*
+             * Имя отклонено.
+             */
             reachGoal(
                 "name_rejected",
                 {
@@ -477,14 +714,17 @@ export default function RankingExperience({
                 }
             );
 
+
             setAddState(
                 "rejected"
             );
+
 
             setStatus(
                 data.message ||
                 "НЕ УДАЛОСЬ ПОДТВЕРДИТЬ ИМЯ"
             );
+
         } catch {
             reachGoal(
                 "name_rejected",
@@ -497,9 +737,11 @@ export default function RankingExperience({
                 }
             );
 
+
             setAddState(
                 "error"
             );
+
 
             setStatus(
                 "НЕ УДАЛОСЬ ПРОВЕРИТЬ ИМЯ"
@@ -507,34 +749,54 @@ export default function RankingExperience({
         }
     }
 
+
     return (
-        <section className="ranking-shell">
-            <div className="leaderboard">
-                <div className="leaderboard-head">
-          <span>
-            РЕЙТИНГ
-          </span>
+        <section
+            className="ranking-shell"
+        >
+            <div
+                className="leaderboard"
+            >
+                <div
+                    className="leaderboard-head"
+                >
+                    <span>
+                        РЕЙТИНГ
+                    </span>
 
                     <span>
-            / ТОП-10 /
-          </span>
+                        / ТОП-10 /
+                    </span>
                 </div>
 
-                <div className="leaderboard-list">
+
+                <div
+                    className="leaderboard-list"
+                >
                     {topNames.map(
                         (
                             item,
                             index
                         ) => (
                             <div
-                                id={`rank-${item.id}`}
-                                key={item.id}
+                                id={
+                                    `rank-${item.id}`
+                                }
+
+                                key={
+                                    item.id
+                                }
                             >
                                 <RankingRow
-                                    item={item}
-                                    rank={
-                                        index + 1
+                                    item={
+                                        item
                                     }
+
+                                    rank={
+                                        index +
+                                        1
+                                    }
+
                                     highlighted={
                                         item.id ===
                                         selectedId
@@ -546,35 +808,56 @@ export default function RankingExperience({
                 </div>
             </div>
 
-            <div className="search-section-title">
+
+            <div
+                className="search-section-title"
+            >
                 ГДЕ ТВОЁ ИМЯ?
             </div>
 
-            <div className="search-stack">
+
+            <div
+                className="search-stack"
+            >
                 <form
                     className="search-form"
-                    onSubmit={submit}
+
+                    onSubmit={
+                        submit
+                    }
                 >
-          <span className="search-prompt">
-            &gt;
-          </span>
+                    <span
+                        className="search-prompt"
+                    >
+                        &gt;
+                    </span>
+
 
                     <input
-                        value={query}
+                        value={
+                            query
+                        }
+
                         onChange={(
                             event
                         ) => {
                             setQuery(
-                                event.target
+                                event
+                                    .target
                                     .value
                             );
 
+
                             clearSearchResult();
                         }}
+
                         placeholder="НАЙТИ ИМЯ_"
+
                         autoComplete="off"
+
                         aria-label="Найти имя"
                     />
+
 
                     <button
                         type="submit"
@@ -583,6 +866,7 @@ export default function RankingExperience({
                     </button>
                 </form>
 
+
                 {status && (
                     <div
                         className={
@@ -590,39 +874,59 @@ export default function RankingExperience({
                             "error" ||
                             addState ===
                             "rejected"
+
                                 ? "search-status error"
+
                                 : "search-status"
                         }
                     >
-                        &gt; {status}
+                        &gt;{" "}
+                        {status}
                     </div>
                 )}
+
 
                 {notFoundName && (
                     <div
                         className="add-name-box"
-                        ref={addNameRef}
+
+                        ref={
+                            addNameRef
+                        }
                     >
-                        <div className="add-name-copy">
-                            <div className="add-name-title">
+                        <div
+                            className="add-name-copy"
+                        >
+                            <div
+                                className="add-name-title"
+                            >
                                 ТАКОГО ИМЕНИ
                                 ПОКА НЕТ
                             </div>
 
-                            <div className="add-name-question">
+
+                            <div
+                                className="add-name-question"
+                            >
                                 ДОБАВИТЬ «
                                 {notFoundName.toUpperCase()}
                                 » В РЕЙТИНГ?
                             </div>
                         </div>
 
+
                         <button
                             className="add-name-button"
-                            onClick={addName}
+
+                            onClick={
+                                addName
+                            }
+
                             disabled={
                                 addState ===
                                 "loading"
                             }
+
                             aria-busy={
                                 addState ===
                                 "loading"
@@ -630,13 +934,17 @@ export default function RankingExperience({
                         >
                             {addState ===
                             "loading" ? (
-                                <span className="loading-content">
-                  <span className="inline-loader dark" />
+                                <span
+                                    className="loading-content"
+                                >
+                                    <span
+                                        className="inline-loader dark"
+                                    />
 
-                  <span>
-                    ПРОВЕРЯЕМ...
-                  </span>
-                </span>
+                                    <span>
+                                        ПРОВЕРЯЕМ...
+                                    </span>
+                                </span>
                             ) : (
                                 "ДОБАВИТЬ"
                             )}
@@ -645,32 +953,41 @@ export default function RankingExperience({
                 )}
             </div>
 
+
             {selectedIndex >=
                 TOP_LIMIT &&
                 localContext.length >
                 0 && (
                     <div
                         className="local-ranking"
+
                         ref={
                             localRankingRef
                         }
                     >
-                        <div className="local-ranking-head">
-              <span>
-                ТВОЁ МЕСТО
-              </span>
+                        <div
+                            className="local-ranking-head"
+                        >
+                            <span>
+                                ТВОЁ МЕСТО
+                            </span>
 
                             <span>
-                / #
+                                / #
                                 {selectedIndex +
                                     1}{" "}
                                 /
-              </span>
+                            </span>
                         </div>
 
-                        <div className="local-ranking-list">
+
+                        <div
+                            className="local-ranking-list"
+                        >
                             {localContext.map(
-                                (item) => {
+                                (
+                                    item
+                                ) => {
                                     const rank =
                                         names.findIndex(
                                             (
@@ -678,19 +995,24 @@ export default function RankingExperience({
                                             ) =>
                                                 name.id ===
                                                 item.id
-                                        ) + 1;
+                                        ) +
+                                        1;
+
 
                                     return (
                                         <RankingRow
                                             key={
                                                 item.id
                                             }
+
                                             item={
                                                 item
                                             }
+
                                             rank={
                                                 rank
                                             }
+
                                             highlighted={
                                                 item.id ===
                                                 selectedId

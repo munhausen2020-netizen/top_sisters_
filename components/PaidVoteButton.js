@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import {
+    useState,
+} from "react";
+
+import {
+    trackProductEvent,
+} from "@/lib/product-analytics";
 
 
-const METRIKA_ID = 112874757;
+const METRIKA_ID =
+    112874757;
 
 
 function reachGoal(
@@ -33,161 +40,11 @@ function reachGoal(
             goal,
             params
         );
+
     } catch (error) {
         console.error(
             "Yandex Metrika goal error:",
             goal,
-            error
-        );
-    }
-}
-
-
-function createId() {
-    if (
-        typeof crypto !==
-        "undefined" &&
-        typeof crypto.randomUUID ===
-        "function"
-    ) {
-        return crypto.randomUUID();
-    }
-
-
-    return [
-        Date.now(),
-        Math.random()
-            .toString(36)
-            .slice(2),
-    ].join("-");
-}
-
-
-function getVisitorId() {
-    if (
-        typeof window ===
-        "undefined"
-    ) {
-        return null;
-    }
-
-
-    const key =
-        "womenname_visitor_id";
-
-
-    let visitorId =
-        window.localStorage
-            .getItem(key);
-
-
-    if (!visitorId) {
-        visitorId =
-            createId();
-
-        window.localStorage
-            .setItem(
-                key,
-                visitorId
-            );
-    }
-
-
-    return visitorId;
-}
-
-
-function getSessionId() {
-    if (
-        typeof window ===
-        "undefined"
-    ) {
-        return null;
-    }
-
-
-    const key =
-        "womenname_session_id";
-
-
-    let sessionId =
-        window.sessionStorage
-            .getItem(key);
-
-
-    if (!sessionId) {
-        sessionId =
-            createId();
-
-        window.sessionStorage
-            .setItem(
-                key,
-                sessionId
-            );
-    }
-
-
-    return sessionId;
-}
-
-
-async function trackProductEvent({
-                                     eventName,
-                                     nameId,
-                                     name,
-                                     amountRub = null,
-                                     votesCount = null,
-                                 }) {
-    if (
-        typeof window ===
-        "undefined"
-    ) {
-        return;
-    }
-
-
-    try {
-        await fetch(
-            "/api/analytics/event",
-            {
-                method:
-                    "POST",
-
-                headers: {
-                    "Content-Type":
-                        "application/json",
-                },
-
-                keepalive:
-                    true,
-
-                body:
-                    JSON.stringify({
-                        eventName,
-
-                        visitorId:
-                            getVisitorId(),
-
-                        sessionId:
-                            getSessionId(),
-
-                        nameId,
-
-                        name,
-
-                        amountRub,
-
-                        votesCount,
-
-                        pageUrl:
-                        window.location.href,
-                    }),
-            }
-        );
-    } catch (error) {
-        console.error(
-            "Product analytics tracking error:",
-            eventName,
             error
         );
     }
@@ -385,6 +242,11 @@ export default function PaidVoteButton({
 
                 votesCount:
                 finalAmount,
+
+                paymentId:
+                    data.paymentId ||
+                    data.payment_id ||
+                    null,
             });
 
 
@@ -428,10 +290,7 @@ export default function PaidVoteButton({
             >
                 <button
                     type="button"
-
-                    className=
-                        "terminal-button"
-
+                    className="terminal-button"
                     onClick={
                         openModal
                     }
@@ -443,8 +302,7 @@ export default function PaidVoteButton({
 
             {isOpen && (
                 <div
-                    className=
-                        "vote-modal-overlay"
+                    className="vote-modal-overlay"
 
                     onMouseDown={(
                         event
@@ -458,31 +316,25 @@ export default function PaidVoteButton({
                     }}
                 >
                     <div
-                        className=
-                            "vote-modal"
+                        className="vote-modal"
                     >
 
                         <div
-                            className=
-                                "vote-modal-label"
+                            className="vote-modal-label"
                         >
                             {">"} ГОЛОСУЙ ЗА ИМЯ
                         </div>
 
 
                         <div
-                            className=
-                                "vote-modal-title"
+                            className="vote-modal-title"
                         >
-                            {
-                                name.toUpperCase()
-                            }
+                            {name.toUpperCase()}
                         </div>
 
 
                         <div
-                            className=
-                                "vote-modal-note"
+                            className="vote-modal-note"
                         >
                             1 ₽ = 1 ГОЛОС
                         </div>
@@ -503,66 +355,58 @@ export default function PaidVoteButton({
                                     "22px",
                             }}
                         >
-                            {[10, 30, 50]
-                                .map(
-                                    (
-                                        value
-                                    ) => (
-                                        <button
-                                            key={
+                            {[10, 30, 50].map(
+                                (
+                                    value
+                                ) => (
+                                    <button
+                                        key={
+                                            value
+                                        }
+
+                                        type="button"
+
+                                        className="terminal-button"
+
+                                        disabled={
+                                            loading
+                                        }
+
+                                        onClick={() => {
+                                            setAmount(
                                                 value
-                                            }
+                                            );
 
-                                            type=
-                                                "button"
+                                            setCustomAmount(
+                                                ""
+                                            );
 
-                                            className=
-                                                "terminal-button"
+                                            setError(
+                                                ""
+                                            );
+                                        }}
 
-                                            disabled={
-                                                loading
-                                            }
+                                        style={{
+                                            minHeight:
+                                                "58px",
 
-                                            onClick={() => {
-                                                setAmount(
-                                                    value
-                                                );
+                                            background:
+                                                !customAmount &&
+                                                amount === value
+                                                    ? "var(--green)"
+                                                    : "#000",
 
-                                                setCustomAmount(
-                                                    ""
-                                                );
-
-                                                setError(
-                                                    ""
-                                                );
-                                            }}
-
-                                            style={{
-                                                minHeight:
-                                                    "58px",
-
-                                                background:
-                                                    !customAmount &&
-                                                    amount ===
-                                                    value
-                                                        ? "var(--green)"
-                                                        : "#000",
-
-                                                color:
-                                                    !customAmount &&
-                                                    amount ===
-                                                    value
-                                                        ? "#000"
-                                                        : "var(--green)",
-                                            }}
-                                        >
-                                            {
-                                                value
-                                            }{" "}
-                                            ₽
-                                        </button>
-                                    )
-                                )}
+                                            color:
+                                                !customAmount &&
+                                                amount === value
+                                                    ? "#000"
+                                                    : "var(--green)",
+                                        }}
+                                    >
+                                        {value} ₽
+                                    </button>
+                                )
+                            )}
                         </div>
 
 
@@ -573,15 +417,10 @@ export default function PaidVoteButton({
                             }}
                         >
                             <input
-                                type=
-                                    "number"
-
+                                type="number"
                                 min="1"
-
                                 max="50000"
-
-                                inputMode=
-                                    "numeric"
+                                inputMode="numeric"
 
                                 value={
                                     customAmount
@@ -591,8 +430,7 @@ export default function PaidVoteButton({
                                     loading
                                 }
 
-                                placeholder=
-                                    "ДРУГАЯ СУММА"
+                                placeholder="ДРУГАЯ СУММА"
 
                                 onChange={(
                                     event
@@ -668,21 +506,15 @@ export default function PaidVoteButton({
 
 
                         <div
-                            className=
-                                "vote-modal-actions"
+                            className="vote-modal-actions"
                         >
 
                             <button
-                                type=
-                                    "button"
-
-                                className=
-                                    "vote-modal-cancel"
-
+                                type="button"
+                                className="vote-modal-cancel"
                                 disabled={
                                     loading
                                 }
-
                                 onClick={
                                     closeModal
                                 }
@@ -692,28 +524,21 @@ export default function PaidVoteButton({
 
 
                             <button
-                                type=
-                                    "button"
-
-                                className=
-                                    "vote-modal-confirm"
-
+                                type="button"
+                                className="vote-modal-confirm"
                                 disabled={
                                     loading
                                 }
-
                                 onClick={
                                     startPayment
                                 }
                             >
                                 {loading ? (
                                     <span
-                                        className=
-                                            "loading-content"
+                                        className="loading-content"
                                     >
                                         <span
-                                            className=
-                                                "inline-loader dark"
+                                            className="inline-loader dark"
                                         />
 
                                         ПЕРЕХОД...
@@ -722,11 +547,7 @@ export default function PaidVoteButton({
                                     <>
                                         ОПЛАТИТЬ
                                         <br />
-
-                                        {
-                                            finalAmount
-                                        }{" "}
-                                        ₽
+                                        {finalAmount} ₽
                                     </>
                                 )}
                             </button>

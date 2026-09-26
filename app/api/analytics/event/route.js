@@ -6,8 +6,11 @@ import {
 
 
 const ALLOWED_EVENTS = new Set([
+    "site_entry",
+    "search_name",
     "vote_open",
     "payment_started",
+    "name_added",
 ]);
 
 
@@ -73,9 +76,11 @@ export async function POST(request) {
 
 
         const amountRub =
+            body?.amountRub !== null &&
+            body?.amountRub !== undefined &&
             Number.isInteger(
                 Number(
-                    body?.amountRub
+                    body.amountRub
                 )
             )
                 ? Number(
@@ -85,14 +90,24 @@ export async function POST(request) {
 
 
         const votesCount =
+            body?.votesCount !== null &&
+            body?.votesCount !== undefined &&
             Number.isInteger(
                 Number(
-                    body?.votesCount
+                    body.votesCount
                 )
             )
                 ? Number(
                     body.votesCount
                 )
+                : null;
+
+
+        const paymentId =
+            body?.paymentId
+                ? String(
+                    body.paymentId
+                ).slice(0, 200)
                 : null;
 
 
@@ -135,6 +150,9 @@ export async function POST(request) {
 
                     votes_count:
                     votesCount,
+
+                    payment_id:
+                    paymentId,
 
                     page_url:
                     pageUrl,
