@@ -1761,3 +1761,22 @@ max-width: 700px
                 8px;
     }
 }
+
+@media (max-height: 450px) and (orientation: landscape) {
+    .hero {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .hero-mascot img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .hero-title {
+        font-size: 34px;
+        line-height: 1.25;
+    }
+}
+
+
