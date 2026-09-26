@@ -6,17 +6,25 @@ import { useState } from "react";
 const METRIKA_ID = 112874757;
 
 
-function reachGoal(goal, params = {}) {
-    if (typeof window === "undefined") return;
-
-    if (typeof window.ym !== "function") {
-        console.warn(
-            "Yandex Metrika is not available:",
-            goal
-        );
-
+function reachGoal(
+    goal,
+    params = {}
+) {
+    if (
+        typeof window ===
+        "undefined"
+    ) {
         return;
     }
+
+
+    if (
+        typeof window.ym !==
+        "function"
+    ) {
+        return;
+    }
+
 
     try {
         window.ym(
@@ -35,24 +43,194 @@ function reachGoal(goal, params = {}) {
 }
 
 
+function createId() {
+    if (
+        typeof crypto !==
+        "undefined" &&
+        typeof crypto.randomUUID ===
+        "function"
+    ) {
+        return crypto.randomUUID();
+    }
+
+
+    return [
+        Date.now(),
+        Math.random()
+            .toString(36)
+            .slice(2),
+    ].join("-");
+}
+
+
+function getVisitorId() {
+    if (
+        typeof window ===
+        "undefined"
+    ) {
+        return null;
+    }
+
+
+    const key =
+        "womenname_visitor_id";
+
+
+    let visitorId =
+        window.localStorage
+            .getItem(key);
+
+
+    if (!visitorId) {
+        visitorId =
+            createId();
+
+        window.localStorage
+            .setItem(
+                key,
+                visitorId
+            );
+    }
+
+
+    return visitorId;
+}
+
+
+function getSessionId() {
+    if (
+        typeof window ===
+        "undefined"
+    ) {
+        return null;
+    }
+
+
+    const key =
+        "womenname_session_id";
+
+
+    let sessionId =
+        window.sessionStorage
+            .getItem(key);
+
+
+    if (!sessionId) {
+        sessionId =
+            createId();
+
+        window.sessionStorage
+            .setItem(
+                key,
+                sessionId
+            );
+    }
+
+
+    return sessionId;
+}
+
+
+async function trackProductEvent({
+                                     eventName,
+                                     nameId,
+                                     name,
+                                     amountRub = null,
+                                     votesCount = null,
+                                 }) {
+    if (
+        typeof window ===
+        "undefined"
+    ) {
+        return;
+    }
+
+
+    try {
+        await fetch(
+            "/api/analytics/event",
+            {
+                method:
+                    "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+                },
+
+                keepalive:
+                    true,
+
+                body:
+                    JSON.stringify({
+                        eventName,
+
+                        visitorId:
+                            getVisitorId(),
+
+                        sessionId:
+                            getSessionId(),
+
+                        nameId,
+
+                        name,
+
+                        amountRub,
+
+                        votesCount,
+
+                        pageUrl:
+                        window.location.href,
+                    }),
+            }
+        );
+    } catch (error) {
+        console.error(
+            "Product analytics tracking error:",
+            eventName,
+            error
+        );
+    }
+}
+
+
 export default function PaidVoteButton({
                                            nameId,
                                            name,
                                            compact = false,
                                        }) {
-    const [isOpen, setIsOpen] =
+    const [
+        isOpen,
+        setIsOpen,
+    ] =
         useState(false);
 
-    const [amount, setAmount] =
+
+    const [
+        amount,
+        setAmount,
+    ] =
         useState(30);
 
-    const [customAmount, setCustomAmount] =
+
+    const [
+        customAmount,
+        setCustomAmount,
+    ] =
         useState("");
 
-    const [loading, setLoading] =
+
+    const [
+        loading,
+        setLoading,
+    ] =
         useState(false);
 
-    const [error, setError] =
+
+    const [
+        error,
+        setError,
+    ] =
         useState("");
 
 
@@ -60,38 +238,62 @@ export default function PaidVoteButton({
         setError("");
         setIsOpen(true);
 
+
         reachGoal(
             "vote_open",
             {
                 name,
-                name_id: nameId,
+                name_id:
+                nameId,
             }
         );
+
+
+        trackProductEvent({
+            eventName:
+                "vote_open",
+
+            nameId,
+
+            name,
+        });
     }
 
 
     function closeModal() {
-        if (loading) return;
+        if (loading) {
+            return;
+        }
+
 
         setIsOpen(false);
+
         setError("");
+
         setCustomAmount("");
+
         setAmount(30);
     }
 
 
     async function startPayment() {
-        if (loading) return;
+        if (loading) {
+            return;
+        }
 
 
         const finalAmount =
             customAmount
-                ? Number(customAmount)
+                ? Number(
+                    customAmount
+                )
                 : amount;
 
 
         if (
-            !Number.isInteger(finalAmount) ||
+            !Number.isInteger(
+                finalAmount
+            ) ||
             finalAmount < 1 ||
             finalAmount > 50000
         ) {
@@ -112,7 +314,8 @@ export default function PaidVoteButton({
                 await fetch(
                     "/api/payments/create",
                     {
-                        method: "POST",
+                        method:
+                            "POST",
 
                         headers: {
                             "Content-Type":
@@ -122,6 +325,7 @@ export default function PaidVoteButton({
                         body:
                             JSON.stringify({
                                 nameId,
+
                                 amount:
                                 finalAmount,
                             }),
@@ -142,7 +346,8 @@ export default function PaidVoteButton({
 
 
             if (
-                !data?.confirmationUrl
+                !data
+                    ?.confirmationUrl
             ) {
                 throw new Error(
                     "НЕ ПОЛУЧЕНА ССЫЛКА НА ОПЛАТУ"
@@ -150,31 +355,39 @@ export default function PaidVoteButton({
             }
 
 
-            /*
-             * Пользователь реально дошёл
-             * до перехода на YooKassa.
-             */
             reachGoal(
                 "payment_started",
                 {
                     name,
-                    name_id: nameId,
-                    amount: finalAmount,
-                    votes: finalAmount,
+
+                    name_id:
+                    nameId,
+
+                    amount:
+                    finalAmount,
+
+                    votes:
+                    finalAmount,
                 }
             );
 
 
-            /*
-             * После успешной оплаты
-             * webhook Supabase сам
-             * начислит голоса.
-             *
-             * vote_confirmed здесь
-             * НЕ отправляем,
-             * потому что оплата ещё
-             * не состоялась.
-             */
+            await trackProductEvent({
+                eventName:
+                    "payment_started",
+
+                nameId,
+
+                name,
+
+                amountRub:
+                finalAmount,
+
+                votesCount:
+                finalAmount,
+            });
+
+
             window.location.href =
                 data.confirmationUrl;
 
@@ -198,7 +411,9 @@ export default function PaidVoteButton({
 
     const finalAmount =
         customAmount
-            ? Number(customAmount) || 0
+            ? Number(
+            customAmount
+        ) || 0
             : amount;
 
 
@@ -213,8 +428,13 @@ export default function PaidVoteButton({
             >
                 <button
                     type="button"
-                    className="terminal-button"
-                    onClick={openModal}
+
+                    className=
+                        "terminal-button"
+
+                    onClick={
+                        openModal
+                    }
                 >
                     ГОЛОСУЙ
                 </button>
@@ -223,9 +443,12 @@ export default function PaidVoteButton({
 
             {isOpen && (
                 <div
-                    className="vote-modal-overlay"
+                    className=
+                        "vote-modal-overlay"
 
-                    onMouseDown={(event) => {
+                    onMouseDown={(
+                        event
+                    ) => {
                         if (
                             event.target ===
                             event.currentTarget
@@ -234,83 +457,112 @@ export default function PaidVoteButton({
                         }
                     }}
                 >
-                    <div className="vote-modal">
+                    <div
+                        className=
+                            "vote-modal"
+                    >
 
-                        <div className="vote-modal-label">
+                        <div
+                            className=
+                                "vote-modal-label"
+                        >
                             {">"} ГОЛОСУЙ ЗА ИМЯ
                         </div>
 
 
-                        <div className="vote-modal-title">
-                            {name.toUpperCase()}
+                        <div
+                            className=
+                                "vote-modal-title"
+                        >
+                            {
+                                name.toUpperCase()
+                            }
                         </div>
 
 
-                        <div className="vote-modal-note">
+                        <div
+                            className=
+                                "vote-modal-note"
+                        >
                             1 ₽ = 1 ГОЛОС
                         </div>
 
 
                         <div
                             style={{
-                                display: "grid",
+                                display:
+                                    "grid",
 
                                 gridTemplateColumns:
                                     "repeat(3, 1fr)",
 
-                                gap: "8px",
+                                gap:
+                                    "8px",
 
-                                marginTop: "22px",
+                                marginTop:
+                                    "22px",
                             }}
                         >
-                            {[10, 30, 50].map(
-                                (value) => (
-                                    <button
-                                        key={value}
-
-                                        type="button"
-
-                                        className="terminal-button"
-
-                                        disabled={
-                                            loading
-                                        }
-
-                                        onClick={() => {
-                                            setAmount(
+                            {[10, 30, 50]
+                                .map(
+                                    (
+                                        value
+                                    ) => (
+                                        <button
+                                            key={
                                                 value
-                                            );
+                                            }
 
-                                            setCustomAmount(
-                                                ""
-                                            );
+                                            type=
+                                                "button"
 
-                                            setError(
-                                                ""
-                                            );
-                                        }}
+                                            className=
+                                                "terminal-button"
 
-                                        style={{
-                                            minHeight:
-                                                "58px",
+                                            disabled={
+                                                loading
+                                            }
 
-                                            background:
-                                                !customAmount &&
-                                                amount === value
-                                                    ? "var(--green)"
-                                                    : "#000",
+                                            onClick={() => {
+                                                setAmount(
+                                                    value
+                                                );
 
-                                            color:
-                                                !customAmount &&
-                                                amount === value
-                                                    ? "#000"
-                                                    : "var(--green)",
-                                        }}
-                                    >
-                                        {value} ₽
-                                    </button>
-                                )
-                            )}
+                                                setCustomAmount(
+                                                    ""
+                                                );
+
+                                                setError(
+                                                    ""
+                                                );
+                                            }}
+
+                                            style={{
+                                                minHeight:
+                                                    "58px",
+
+                                                background:
+                                                    !customAmount &&
+                                                    amount ===
+                                                    value
+                                                        ? "var(--green)"
+                                                        : "#000",
+
+                                                color:
+                                                    !customAmount &&
+                                                    amount ===
+                                                    value
+                                                        ? "#000"
+                                                        : "var(--green)",
+                                            }}
+                                        >
+                                            {
+                                                value
+                                            }{" "}
+                                            ₽
+                                        </button>
+                                    )
+                                )}
                         </div>
 
 
@@ -321,13 +573,15 @@ export default function PaidVoteButton({
                             }}
                         >
                             <input
-                                type="number"
+                                type=
+                                    "number"
 
                                 min="1"
 
                                 max="50000"
 
-                                inputMode="numeric"
+                                inputMode=
+                                    "numeric"
 
                                 value={
                                     customAmount
@@ -419,7 +673,8 @@ export default function PaidVoteButton({
                         >
 
                             <button
-                                type="button"
+                                type=
+                                    "button"
 
                                 className=
                                     "vote-modal-cancel"
@@ -437,7 +692,8 @@ export default function PaidVoteButton({
 
 
                             <button
-                                type="button"
+                                type=
+                                    "button"
 
                                 className=
                                     "vote-modal-confirm"
@@ -466,6 +722,7 @@ export default function PaidVoteButton({
                                     <>
                                         ОПЛАТИТЬ
                                         <br />
+
                                         {
                                             finalAmount
                                         }{" "}
